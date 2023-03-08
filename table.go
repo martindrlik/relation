@@ -1,4 +1,4 @@
-package main
+package store
 
 import "encoding/json"
 
@@ -6,61 +6,52 @@ type Table struct {
 	columns []Column
 }
 
-func (table *Table) firstColumn() (*Column, bool) {
+func (table *Table) Len() int {
 	if len(table.columns) > 0 {
-		return &table.columns[0], true
+		return table.columns[0].Len()
 	}
-	return nil, false
+	return 0
 }
 
-func (table *Table) ColumnByName(name string) (*Column, bool) {
-	for i, column := range table.columns {
-		if name == column.Name {
-			return &table.columns[i], true
-		}
-	}
-	return nil, false
-}
-
-func (table *Table) appendColumn(name string) *Column {
-	var data []any
-	if column, ok := table.firstColumn(); ok {
-		for _ = range column.Data {
-			data = append(data, NoValue{})
-		}
-	}
-	table.columns = append(table.columns, Column{Name: name})
-	return &table.columns[len(table.columns)-1]
-}
-
-func (table *Table) Append(s string) error {
-	m := map[string]any{}
-	err := json.Unmarshal([]byte(s), &m)
+func (table *Table) InsertOne(s string) error {
+	src := map[string]any{}
+	err := json.Unmarshal([]byte(s), &src)
 	if err != nil {
 		return err
 	}
+	insertingRowIndex := table.Len()
+	// fill existing columns
 	for i, column := range table.columns {
-		if value, ok := m[column.Name]; ok {
-			table.columns[i].Append(value)
-			delete(m, column.Name)
+		if v, ok := src[column.Name]; ok {
+			table.columns[i].Insert(v)
+			delete(src, column.Name)
 		} else {
-			table.columns[i].Append(NoValue{})
+			table.columns[i].Insert(NoValue{})
 		}
 	}
-	for name, value := range m {
-		table.appendColumn(name).Append(value)
+	// add new columns
+	for name, v := range src {
+		data := make([]any, insertingRowIndex, insertingRowIndex+1)
+		for i := 0; i < insertingRowIndex; i++ {
+			data[i] = NoValue{}
+		}
+		data = append(data, v)
+		table.columns = append(table.columns, Column{
+			Name: name,
+			data: data})
 	}
+
 	return nil
 }
 
-func (table *Table) Row(n int) ([]any, error) {
-	column, ok := table.firstColumn()
-	if !ok || n < 0 || n >= len(column.Data) {
-		return nil, NoData
+func (table *Table) At(i int) (t []any, ok bool) {
+	ok = i >= 0 && i < table.Len()
+	if !ok {
+		return
 	}
-	data := make([]any, len(table.columns))
-	for i, column := range table.columns {
-		data[i] = column.Data[n]
+	for _, column := range table.columns {
+		v, _ := column.At(i)
+		t = append(t, v)
 	}
-	return data, nil
+	return
 }

@@ -1,3 +1,3 @@
-package main
+package store
 
 type NoValue struct{}
