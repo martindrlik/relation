@@ -1,12 +1,8 @@
-package store_test
+package rex_test
 
-func nerr(err error) {
+func must[T any](t T, err error) T {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func must[T any](t T, err error) T {
-	nerr(err)
 	return t
 }

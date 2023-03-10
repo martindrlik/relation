@@ -1,57 +1,73 @@
-package store
+package rex
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 type Table struct {
 	columns []Column
 }
 
-func (table *Table) Len() int {
-	if len(table.columns) > 0 {
-		return table.columns[0].Len()
+func (t *Table) At(i int) (u []any, ok bool) {
+	ok = i >= 0 && i < t.Len()
+	if !ok {
+		return
+	}
+	for _, col := range t.columns {
+		v, _ := col.At(i)
+		u = append(u, v)
+	}
+	return
+}
+
+func (t *Table) Len() int {
+	if len(t.columns) > 0 {
+		return t.columns[0].Len()
 	}
 	return 0
 }
 
-func (table *Table) InsertOne(s string) error {
+func (t *Table) InsertOne(s string) *Table {
 	src := map[string]any{}
 	err := json.Unmarshal([]byte(s), &src)
 	if err != nil {
-		return err
+		panic(err)
 	}
-	insertingRowIndex := table.Len()
+	insertingRowIndex := t.Len()
 	// fill existing columns
-	for i, column := range table.columns {
-		if v, ok := src[column.Name]; ok {
-			table.columns[i].Insert(v)
-			delete(src, column.Name)
+	for i, col := range t.columns {
+		if v, ok := src[col.Name]; ok {
+			t.columns[i].Insert(v)
+			delete(src, col.Name)
 		} else {
-			table.columns[i].Insert(NoValue{})
+			t.columns[i].Insert(Empty{})
 		}
 	}
 	// add new columns
 	for name, v := range src {
 		data := make([]any, insertingRowIndex, insertingRowIndex+1)
 		for i := 0; i < insertingRowIndex; i++ {
-			data[i] = NoValue{}
+			data[i] = Empty{}
 		}
 		data = append(data, v)
-		table.columns = append(table.columns, Column{
+		t.columns = append(t.columns, Column{
 			Name: name,
 			data: data})
 	}
-
-	return nil
+	return t
 }
 
-func (table *Table) At(i int) (t []any, ok bool) {
-	ok = i >= 0 && i < table.Len()
-	if !ok {
-		return
+func (t *Table) RemoveAt(i int) *Table {
+	for j := range t.columns {
+		t.columns[j].RemoveAt(i)
 	}
-	for _, column := range table.columns {
-		v, _ := column.At(i)
-		t = append(t, v)
+	return t
+}
+
+func (t *Table) colSet() map[string]Column {
+	m := map[string]Column{}
+	for _, col := range t.columns {
+		m[col.Name] = col
 	}
-	return
+	return m
 }

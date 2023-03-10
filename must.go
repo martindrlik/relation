@@ -1,4 +1,4 @@
-package store
+package rex
 
 func nerr(err error) {
 	if err != nil {

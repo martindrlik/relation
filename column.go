@@ -1,31 +1,31 @@
-package store
+package rex
 
 type Column struct {
 	Name string
 	data []any
 }
 
-func (column *Column) At(i int) (v any, ok bool) {
-	if l := len(column.data); i >= 0 && i < l {
-		return column.data[i], true
+func (col *Column) At(i int) (v any, ok bool) {
+	if l := len(col.data); i >= 0 && i < l {
+		return col.data[i], true
 	}
 	return
 }
 
-func (column *Column) Len() int {
-	return len(column.data)
+func (col *Column) Len() int {
+	return len(col.data)
 }
 
-func (column *Column) Insert(value any) {
-	column.data = append(column.data, value)
+func (col *Column) Insert(value any) {
+	col.data = append(col.data, value)
 }
 
-func (column *Column) Delete(i int) {
-	last := column.Len() - 1
+func (col *Column) RemoveAt(i int) {
+	last := col.Len() - 1
 	if i >= 0 && i <= last {
 		if i < last {
-			column.data[i] = column.data[last]
+			col.data[i] = col.data[last]
 		}
-		column.data = column.data[:last]
+		col.data = col.data[:last]
 	}
 }

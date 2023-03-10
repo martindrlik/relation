@@ -1,4 +1,4 @@
-package store_test
+package rex_test
 
 import (
 	"fmt"

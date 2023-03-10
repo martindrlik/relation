@@ -1,60 +1,60 @@
-package store_test
+package rex_test
 
 import (
 	"testing"
 
-	"github.com/martindrlik/store"
+	"github.com/martindrlik/rex"
 )
 
 func TestColumn(t *testing.T) {
 	t.Run("insert one", func(t *testing.T) {
-		column := store.Column{}
-		column.Insert("foo")
-		if n := column.Len(); n != 1 {
-			t.Errorf("expected length to be 1 got %d", n)
+		col := rex.Column{}
+		col.Insert("foo")
+		if ln := col.Len(); ln != 1 {
+			t.Errorf("expected length to be 1 got %d", ln)
 		}
-		if v, ok := column.At(0); !ok || v != "foo" {
+		if v, ok := col.At(0); !ok || v != "foo" {
 			t.Errorf("expected \"foo\" got %v %v", v, ok)
 		}
 	})
-	t.Run("delete last of two", func(t *testing.T) {
-		column := store.Column{}
-		column.Insert("foo")
-		column.Insert("bar")
-		column.Delete(1)
-		if n := column.Len(); n != 1 {
-			t.Errorf("expected length to be 1 got %d", n)
+	t.Run("remove last one of two", func(t *testing.T) {
+		col := rex.Column{}
+		col.Insert("foo")
+		col.Insert("bar")
+		col.RemoveAt(1)
+		if ln := col.Len(); ln != 1 {
+			t.Errorf("expected length to be 1 got %d", ln)
 		}
-		if v, ok := column.At(0); !ok || v != "foo" {
+		if v, ok := col.At(0); !ok || v != "foo" {
 			t.Errorf("expected last \"foo\" move to first but got %v %v", v, ok)
 		}
 	})
-	t.Run("delete first of two", func(t *testing.T) {
-		column := store.Column{}
-		column.Insert("foo")
-		column.Insert("bar")
-		column.Delete(0)
-		if n := column.Len(); n != 1 {
-			t.Errorf("expected length to be 1 got %d", n)
+	t.Run("remove first one of two", func(t *testing.T) {
+		col := rex.Column{}
+		col.Insert("foo")
+		col.Insert("bar")
+		col.RemoveAt(0)
+		if ln := col.Len(); ln != 1 {
+			t.Errorf("expected length to be 1 got %d", ln)
 		}
-		if v, ok := column.At(0); !ok || v != "bar" {
+		if v, ok := col.At(0); !ok || v != "bar" {
 			t.Errorf("expected last \"bar\" move to first but got %v %v", v, ok)
 		}
 	})
-	t.Run("delete last one", func(t *testing.T) {
-		column := store.Column{}
-		column.Insert("foo")
-		column.Delete(0)
-		if n := column.Len(); n != 0 {
-			t.Errorf("expected length to be 0 got %d", n)
+	t.Run("remove last", func(t *testing.T) {
+		col := rex.Column{}
+		col.Insert("foo")
+		col.RemoveAt(0)
+		if ln := col.Len(); ln != 0 {
+			t.Errorf("expected length to be 0 got %d", ln)
 		}
 	})
-	t.Run("out of range delete nothing removed", func(t *testing.T) {
-		column := store.Column{}
-		column.Insert("foo")
-		column.Delete(-1)
-		column.Delete(1)
-		if v, ok := column.At(0); !ok || v != "foo" {
+	t.Run("remove out of range", func(t *testing.T) {
+		col := rex.Column{}
+		col.Insert("foo")
+		col.RemoveAt(-1)
+		col.RemoveAt(1)
+		if v, ok := col.At(0); !ok || v != "foo" {
 			t.Errorf("expected \"foo\" got %v %v", v, ok)
 		}
 	})

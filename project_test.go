@@ -1,13 +1,13 @@
-package store_test
+package rex_test
 
 import (
 	"testing"
 
-	"github.com/martindrlik/store"
+	"github.com/martindrlik/rex"
 )
 
 func TestProject(t *testing.T) {
-	users := store.Table{}
+	users := rex.Table{}
 	users.InsertOne(`{"name": "Martin", "age": 39}`)
 	p := users.Project("age")
 	tuple, ok := p.At(0)
