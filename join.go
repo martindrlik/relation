@@ -7,11 +7,15 @@ func (left *Table) NaturalJoin(right *Table) *Table {
 	lcsd := left.colSetDiff(&Table{columns: lci})
 	rcsd := right.colSetDiff(&Table{columns: rci})
 	src := append(lci, append(lcsd, rcsd...)...)
+	dst := make([]Column, len(src))
 	ri := rowIntersect(lci, rci)
-	t := Table{columns: src}
-	for i := range t.columns {
-		t.columns[i].data = make([]any, 0, len(ri))
+	for i, col := range src {
+		dst[i] = Column{
+			Name: col.Name,
+			data: make([]any, 0, len(ri)),
+		}
 	}
+	t := Table{columns: dst}
 	for _, i := range ri {
 		for j, col := range src {
 			t.columns[j].data = append(t.columns[j].data, col.data[i])
@@ -32,9 +36,11 @@ func (left *Table) colIntersect(right *Table) (lci, rci []Column) {
 }
 
 func rowIntersect(left, right []Column) (ri []int) {
-	for i, lv := range left {
-		if reflect.DeepEqual(lv, right[i]) {
-			ri = append(ri, i)
+	for i, lc := range left {
+		for j, lv := range lc.data {
+			if reflect.DeepEqual(lv, right[i].data[j]) {
+				ri = append(ri, j)
+			}
 		}
 	}
 	return

@@ -10,10 +10,9 @@ func TestProject(t *testing.T) {
 	users := rex.Table{}
 	users.InsertOne(`{"name": "Martin", "age": 39}`)
 	p := users.Project("age")
-	tuple, ok := p.At(0)
-	actual := dump(tuple...)
+	actual := dump(p.At(0)...)
 	expect := dump(float64(39))
-	if !ok || actual != expect {
-		t.Errorf("expected tuple %v and ok to be true, got %v and %v", expect, actual, ok)
+	if actual != expect {
+		t.Errorf("expected tuple %v, got %v", expect, actual)
 	}
 }

@@ -8,9 +8,8 @@ type Table struct {
 	columns []Column
 }
 
-func (t *Table) At(i int) (u []any, ok bool) {
-	ok = i >= 0 && i < t.Len()
-	if !ok {
+func (t *Table) At(i int) (u []any) {
+	if i < 0 || i >= t.Len() {
 		return
 	}
 	for _, col := range t.columns {
