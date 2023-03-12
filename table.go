@@ -6,12 +6,6 @@ type Table struct {
 	columns columns
 }
 
-func NewTable() *Table {
-	return &Table{
-		columns: columns{},
-	}
-}
-
 func (t *Table) project(pc []string) [][]any {
 	pc = func() []string {
 		if len(pc) > 0 {
