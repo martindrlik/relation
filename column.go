@@ -1,31 +1,28 @@
 package rex
 
-type Column struct {
-	Name string
-	Data []any
+type column struct {
+	name string
+	data []any
 }
 
-func (co *Column) At(i int) (f Field, ok bool) {
-	if l := len(co.Data); i >= 0 && i < l {
-		return Field{co.Name, co.Data[i]}, true
+func (c *column) dataAt(i int) any { return c.data[i] }
+func (c *column) dataLen() int     { return len(c.data) }
+func (c *column) insertData(v any) { c.data = append(c.data, v) }
+
+func (c *column) removeDataAt(i int) {
+	last := c.dataLen() - 1
+	if i < last {
+		c.data[i] = c.data[last]
 	}
-	return
+	c.data = c.data[:last]
 }
 
-func (co *Column) Len() int {
-	return len(co.Data)
-}
+type columns []column
 
-func (co *Column) Insert(value any) {
-	co.Data = append(co.Data, value)
-}
-
-func (co *Column) RemoveAt(i int) {
-	last := co.Len() - 1
-	if i >= 0 && i <= last {
-		if i < last {
-			co.Data[i] = co.Data[last]
-		}
-		co.Data = co.Data[:last]
-	}
+func (cs columns) Len() int           { return len(cs) }
+func (cs columns) Less(i, j int) bool { return cs[i].name < cs[j].name }
+func (cs columns) Swap(i, j int) {
+	x := cs[i]
+	cs[i] = cs[j]
+	cs[j] = x
 }

@@ -2,56 +2,16 @@ package rex
 
 import (
 	"encoding/json"
+	"sort"
 )
 
 type Table struct {
-	columns []Column
+	columns columns
 }
 
-func (t *Table) Select(options ...func(*Select)) [][]any {
-	sel := &Select{}
-	for _, option := range options {
-		option(sel)
-	}
-	ri := sel.rowIndices(t)
-	result := make([][]any, len(ri))
-	for i, ii := range ri {
-		result[i] = make([]any, len(t.columns))
-		for j, co := range t.columns {
-			result[i][j] = co.Data[ii]
-		}
-	}
-	return result
-}
-
-func (t *Table) SelectRange(from, to int, columns ...string) [][]any {
-	ln := t.Len()
-	if ln == 0 {
-		return nil
-	}
-	if from < 0 || from >= ln {
-		from = 0
-	}
-	if to < 0 || to >= ln {
-		to = ln - 1
-	}
-	tm := t.mapColumnByName()
-	fs := make([][]any, 1+to-from)
-	for ri := from; ri <= to; ri++ {
-		fs[ri] = make([]any, len(columns))
-		for ci, cn := range columns {
-			if co, ok := tm[cn]; ok {
-				f, _ := co.At(ri)
-				fs[ri][ci] = f.Value
-			}
-		}
-	}
-	return fs
-}
-
-func (t *Table) Len() int {
+func (t *Table) DataLen() int {
 	if len(t.columns) > 0 {
-		return t.columns[0].Len()
+		return t.columns[0].dataLen()
 	}
 	return 0
 }
@@ -62,41 +22,64 @@ func (t *Table) InsertOne(s string) *Table {
 	if err != nil {
 		panic(err)
 	}
-	insertingRowIndex := t.Len()
+	ri := t.DataLen()
 	// fill existing columns
 	for i, co := range t.columns {
-		if v, ok := src[co.Name]; ok {
-			t.columns[i].Insert(v)
-			delete(src, co.Name)
+		if v, ok := src[co.name]; ok {
+			t.columns[i].insertData(v)
+			delete(src, co.name)
 		} else {
-			t.columns[i].Insert(Empty{})
+			t.columns[i].insertData(Empty{})
 		}
 	}
 	// add new columns
 	for fn, fv := range src {
-		data := make([]any, insertingRowIndex, insertingRowIndex+1)
-		for i := 0; i < insertingRowIndex; i++ {
+		data := make([]any, ri, ri+1)
+		for i := 0; i < ri; i++ {
 			data[i] = Empty{}
 		}
 		data = append(data, fv)
-		t.columns = append(t.columns, Column{
-			Name: fn,
-			Data: data})
+		t.columns = append(t.columns, column{
+			name: fn,
+			data: data})
+	}
+	if len(src) > 0 {
+		sort.Sort(t.columns)
 	}
 	return t
 }
 
 func (t *Table) RemoveAt(i int) *Table {
 	for j := range t.columns {
-		t.columns[j].RemoveAt(i)
+		t.columns[j].removeDataAt(i)
 	}
 	return t
 }
 
-func (t *Table) mapColumnByName() map[string]Column {
-	m := map[string]Column{}
+func (t *Table) project(pc ...string) []column {
+	if len(pc) == 0 {
+		return t.columns
+	}
+	s := make([]column, len(pc))
+	for i, n := range pc {
+		s[i] = t.columnByName(n)
+	}
+	return s
+}
+
+func (t *Table) columnByName(s string) column {
+	for _, c := range t.columns {
+		if c.name == s {
+			return c
+		}
+	}
+	return column{name: s}
+}
+
+func (t *Table) mapColumnByName() map[string]column {
+	m := map[string]column{}
 	for _, co := range t.columns {
-		m[co.Name] = co
+		m[co.name] = co
 	}
 	return m
 }

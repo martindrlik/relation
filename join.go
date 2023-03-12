@@ -7,27 +7,27 @@ func (left *Table) NaturalJoin(right *Table) *Table {
 	lcsd := left.colSetDiff(&Table{columns: lci})
 	rcsd := right.colSetDiff(&Table{columns: rci})
 	src := append(lci, append(lcsd, rcsd...)...)
-	dst := make([]Column, len(src))
+	dst := make([]column, len(src))
 	ri := rowIntersect(lci, rci)
 	for i, col := range src {
-		dst[i] = Column{
-			Name: col.Name,
-			Data: make([]any, 0, len(ri)),
+		dst[i] = column{
+			name: col.name,
+			data: make([]any, 0, len(ri)),
 		}
 	}
 	t := Table{columns: dst}
 	for _, i := range ri {
 		for j, col := range src {
-			t.columns[j].Data = append(t.columns[j].Data, col.Data[i])
+			t.columns[j].data = append(t.columns[j].data, col.data[i])
 		}
 	}
 	return &t
 }
 
-func (left *Table) colIntersect(right *Table) (lci, rci []Column) {
+func (left *Table) colIntersect(right *Table) (lci, rci []column) {
 	lm := left.mapColumnByName()
 	for _, rc := range right.columns {
-		if lc, ok := lm[rc.Name]; ok {
+		if lc, ok := lm[rc.name]; ok {
 			lci = append(lci, lc)
 			rci = append(rci, rc)
 		}
@@ -35,10 +35,10 @@ func (left *Table) colIntersect(right *Table) (lci, rci []Column) {
 	return
 }
 
-func rowIntersect(left, right []Column) (ri []int) {
+func rowIntersect(left, right []column) (ri []int) {
 	for i, lc := range left {
-		for j, lv := range lc.Data {
-			if reflect.DeepEqual(lv, right[i].Data[j]) {
+		for j, lv := range lc.data {
+			if reflect.DeepEqual(lv, right[i].data[j]) {
 				ri = append(ri, j)
 			}
 		}
@@ -46,10 +46,10 @@ func rowIntersect(left, right []Column) (ri []int) {
 	return
 }
 
-func (left *Table) colSetDiff(right *Table) (csd []Column) {
+func (left *Table) colSetDiff(right *Table) (csd []column) {
 	rm := right.mapColumnByName()
 	for _, lc := range left.columns {
-		if _, ok := rm[lc.Name]; !ok {
+		if _, ok := rm[lc.name]; !ok {
 			csd = append(csd, lc)
 		}
 	}
