@@ -1,15 +1,12 @@
 package rex
 
-func (table *Table) Project(columns ...string) *Table {
-	p := Table{}
-	m := map[string]struct{}{}
-	for _, col := range columns {
-		m[col] = struct{}{}
-	}
-	for _, col := range table.columns {
-		if _, ok := m[col.Name]; ok {
-			p.columns = append(p.columns, col)
+func (t *Table) Project(columns ...string) *Table {
+	tm := t.mapColumnByName()
+	pc := make([]Column, 0, len(columns))
+	for _, cn := range columns {
+		if co, ok := tm[cn]; ok {
+			pc = append(pc, co)
 		}
 	}
-	return &p
+	return &Table{columns: pc}
 }

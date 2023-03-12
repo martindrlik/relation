@@ -8,15 +8,45 @@ type Table struct {
 	columns []Column
 }
 
-func (t *Table) At(i int) (u []any) {
-	if i < 0 || i >= t.Len() {
-		return
+func (t *Table) Select(options ...func(*Select)) [][]any {
+	sel := &Select{}
+	for _, option := range options {
+		option(sel)
 	}
-	for _, col := range t.columns {
-		v, _ := col.At(i)
-		u = append(u, v)
+	ri := sel.rowIndices(t)
+	result := make([][]any, len(ri))
+	for i, ii := range ri {
+		result[i] = make([]any, len(t.columns))
+		for j, co := range t.columns {
+			result[i][j] = co.Data[ii]
+		}
 	}
-	return
+	return result
+}
+
+func (t *Table) SelectRange(from, to int, columns ...string) [][]any {
+	ln := t.Len()
+	if ln == 0 {
+		return nil
+	}
+	if from < 0 || from >= ln {
+		from = 0
+	}
+	if to < 0 || to >= ln {
+		to = ln - 1
+	}
+	tm := t.mapColumnByName()
+	fs := make([][]any, 1+to-from)
+	for ri := from; ri <= to; ri++ {
+		fs[ri] = make([]any, len(columns))
+		for ci, cn := range columns {
+			if co, ok := tm[cn]; ok {
+				f, _ := co.At(ri)
+				fs[ri][ci] = f.Value
+			}
+		}
+	}
+	return fs
 }
 
 func (t *Table) Len() int {
@@ -34,24 +64,24 @@ func (t *Table) InsertOne(s string) *Table {
 	}
 	insertingRowIndex := t.Len()
 	// fill existing columns
-	for i, col := range t.columns {
-		if v, ok := src[col.Name]; ok {
+	for i, co := range t.columns {
+		if v, ok := src[co.Name]; ok {
 			t.columns[i].Insert(v)
-			delete(src, col.Name)
+			delete(src, co.Name)
 		} else {
 			t.columns[i].Insert(Empty{})
 		}
 	}
 	// add new columns
-	for name, v := range src {
+	for fn, fv := range src {
 		data := make([]any, insertingRowIndex, insertingRowIndex+1)
 		for i := 0; i < insertingRowIndex; i++ {
 			data[i] = Empty{}
 		}
-		data = append(data, v)
+		data = append(data, fv)
 		t.columns = append(t.columns, Column{
-			Name: name,
-			data: data})
+			Name: fn,
+			Data: data})
 	}
 	return t
 }
@@ -63,10 +93,10 @@ func (t *Table) RemoveAt(i int) *Table {
 	return t
 }
 
-func (t *Table) colSet() map[string]Column {
+func (t *Table) mapColumnByName() map[string]Column {
 	m := map[string]Column{}
-	for _, col := range t.columns {
-		m[col.Name] = col
+	for _, co := range t.columns {
+		m[co.Name] = co
 	}
 	return m
 }

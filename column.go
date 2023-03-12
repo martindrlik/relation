@@ -2,30 +2,30 @@ package rex
 
 type Column struct {
 	Name string
-	data []any
+	Data []any
 }
 
-func (col *Column) At(i int) (v any, ok bool) {
-	if l := len(col.data); i >= 0 && i < l {
-		return col.data[i], true
+func (co *Column) At(i int) (f Field, ok bool) {
+	if l := len(co.Data); i >= 0 && i < l {
+		return Field{co.Name, co.Data[i]}, true
 	}
 	return
 }
 
-func (col *Column) Len() int {
-	return len(col.data)
+func (co *Column) Len() int {
+	return len(co.Data)
 }
 
-func (col *Column) Insert(value any) {
-	col.data = append(col.data, value)
+func (co *Column) Insert(value any) {
+	co.Data = append(co.Data, value)
 }
 
-func (col *Column) RemoveAt(i int) {
-	last := col.Len() - 1
+func (co *Column) RemoveAt(i int) {
+	last := co.Len() - 1
 	if i >= 0 && i <= last {
 		if i < last {
-			col.data[i] = col.data[last]
+			co.Data[i] = co.Data[last]
 		}
-		col.data = col.data[:last]
+		co.Data = co.Data[:last]
 	}
 }

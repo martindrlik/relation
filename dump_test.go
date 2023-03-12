@@ -1,17 +1,16 @@
 package rex_test
 
 import (
-	"fmt"
+	"encoding/json"
 	"strings"
 )
 
-func dump(t ...any) string {
-	var sb strings.Builder
-	for _, t := range t {
-		if sb.Len() > 0 {
-			sb.WriteString(" ")
-		}
-		sb.WriteString(fmt.Sprintf("%T(%v)", t, t))
+func dump(fs [][]any) string {
+	sb := &strings.Builder{}
+	enc := json.NewEncoder(sb)
+	err := enc.Encode(fs)
+	if err != nil {
+		panic(err)
 	}
 	return sb.String()
 }
