@@ -2,17 +2,19 @@ package rex_test
 
 import (
 	"testing"
+
+	"github.com/martindrlik/rex"
 )
 
 func TestNaturalJoin(t *testing.T) {
-	// q := rex.Table{}
-	// r := rex.Table{}
-	// q.InsertOne(`{"a": 5, "b": 6}`)
-	// r.InsertOne(`{"a": 5, "b": 6, "c": 11}`)
-	// s := q.NaturalJoin(&r).At(0)
-	// ac := dump(q.NaturalJoin(&r).At(0)...)
-	// ex := dump(float64(5), float64(6), float64(11))
-	// if ac != ex {
-	// 	t.Errorf("expected tuple %v, got %v", ex, ac)
-	// }
+	public := rex.Table{}
+	private := rex.Table{}
+	public.InsertOne(`{"username": "foo", "score": 2}`)
+	private.InsertOne(`{"username": "foo", "email": "foo@example.com"}`)
+	rows := public.NaturalJoin(&private).Select(rex.Project("score", "email"))
+	ac := dump(rows)
+	ex := dump([][]any{{2, "foo@example.com"}})
+	if ac != ex {
+		t.Errorf("expected\n%vgot\n%v", ex, ac)
+	}
 }

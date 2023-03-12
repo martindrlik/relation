@@ -15,13 +15,13 @@ func (left *Table) NaturalJoin(right *Table) *Table {
 			data: make([]any, 0, len(ri)),
 		}
 	}
-	t := Table{columns: dst}
+	result := Table{columns: dst}
 	for _, i := range ri {
-		for j, col := range src {
-			t.columns[j].data = append(t.columns[j].data, col.data[i])
+		for j, c := range src {
+			result.columns[j].insertData(c.data[i])
 		}
 	}
-	return &t
+	return &result
 }
 
 func (left *Table) colIntersect(right *Table) (lci, rci []column) {
