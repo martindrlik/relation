@@ -5,10 +5,10 @@ import (
 	"strings"
 )
 
-func dump(fs [][]any) string {
+func dump(rows [][]any) string {
 	sb := &strings.Builder{}
 	enc := json.NewEncoder(sb)
-	err := enc.Encode(fs)
+	err := enc.Encode(rows)
 	if err != nil {
 		panic(err)
 	}

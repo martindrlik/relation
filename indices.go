@@ -6,8 +6,15 @@ import (
 )
 
 func (t *Table) indices(s *Select) []int {
+	if t.columns.Len() == 0 {
+		return nil
+	}
 	if len(s.whereMap) == 0 {
-		return t.allIndices()
+		result := make([]int, t.columns[0].dataLen())
+		for i, ln := 0, t.columns[0].dataLen(); i < ln; i++ {
+			result[i] = i
+		}
+		return result
 	}
 	m := make(map[int]struct{})
 	for _, c := range t.columns {
@@ -23,17 +30,6 @@ func (t *Table) indices(s *Select) []int {
 	for i := range m {
 		result = append(result, i)
 	}
-	sort.Sort(sort.IntSlice(result))
+	sort.Ints(result)
 	return result
-}
-
-func (t *Table) allIndices() []int {
-	if len(t.columns) == 0 {
-		return nil
-	}
-	ri := make([]int, t.columns[0].dataLen())
-	for i := range ri {
-		ri[i] = i
-	}
-	return ri
 }
