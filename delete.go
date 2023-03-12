@@ -8,9 +8,7 @@ func (t *Table) Delete(options ...func(*Select)) int {
 	ri := t.indices(s)
 	ln := len(ri)
 	for i := ln - 1; i >= 0; i-- {
-		for j := range t.columns {
-			t.columns[j].removeDataAt(ri[i])
-		}
+		t.columns.removeDataAt(ri[i])
 	}
 	return ln
 }

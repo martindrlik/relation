@@ -1,28 +1,49 @@
 package rex
 
-type column struct {
-	name string
-	data []any
-}
+type columns map[string][]any
 
-func (c *column) dataAt(i int) any { return c.data[i] }
-func (c *column) dataLen() int     { return len(c.data) }
-func (c *column) insertData(v any) { c.data = append(c.data, v) }
-
-func (c *column) removeDataAt(i int) {
-	last := c.dataLen() - 1
-	if i < last {
-		c.data[i] = c.data[last]
+func (c columns) removeDataAt(i int) {
+	for name, data := range c {
+		last := len(data) - 1
+		if i < last {
+			data[i] = data[last]
+		}
+		c[name] = data[:last]
 	}
-	c.data = c.data[:last]
 }
 
-type columns []column
+func (t *Table) columnsExcept(except columns) columns {
+	cem := columns{}
+	for name, data := range t.columns {
+		if _, ok := except[name]; !ok {
+			cem[name] = data
+		}
+	}
+	return cem
+}
 
-func (cs columns) Len() int           { return len(cs) }
-func (cs columns) Less(i, j int) bool { return cs[i].name < cs[j].name }
-func (cs columns) Swap(i, j int) {
-	x := cs[i]
-	cs[i] = cs[j]
-	cs[j] = x
+func columnsIntersect(tables ...*Table) []columns {
+	im := map[string]struct{}{}
+	for name := range tables[0].columns {
+		ok := false
+		for i := 1; i < len(tables); i++ {
+			if _, ok = tables[i].columns[name]; !ok {
+				break
+			}
+		}
+		if ok {
+			im[name] = struct{}{}
+		}
+	}
+	if len(im) <= 0 {
+		return nil
+	}
+	r := make([]columns, len(tables))
+	for i, t := range tables {
+		r[i] = columns{}
+		for name := range im {
+			r[i][name] = t.columns[name]
+		}
+	}
+	return r
 }

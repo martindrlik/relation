@@ -4,12 +4,12 @@ import "encoding/json"
 
 type Select struct {
 	whereMap map[string]interface{}
-	pcolumns []string
+	pcols    []string
 }
 
-func Where(w string) func(*Select) {
+func Where(restrict string) func(*Select) {
 	wm := map[string]interface{}{}
-	err := json.Unmarshal([]byte(w), &wm)
+	err := json.Unmarshal([]byte(restrict), &wm)
 	if err != nil {
 		panic(err)
 	}
@@ -20,7 +20,7 @@ func Where(w string) func(*Select) {
 
 func Project(columns ...string) func(*Select) {
 	return func(s *Select) {
-		s.pcolumns = columns
+		s.pcols = columns
 	}
 }
 
@@ -29,15 +29,15 @@ func (t *Table) Select(options ...func(*Select)) [][]any {
 	for _, option := range options {
 		option(s)
 	}
-	ri := t.indices(s)
-	pc := t.project(s.pcolumns...)
-	rows := make([][]any, 0, len(ri))
-	for _, i := range ri {
+	si := t.indices(s)
+	pc := t.project(s.pcols)
+	rs := make([][]any, 0, len(si))
+	for _, ri := range si {
 		row := make([]any, len(pc))
-		for j, c := range pc {
-			row[j] = c.dataAt(i)
+		for ci, data := range pc {
+			row[ci] = data[ri]
 		}
-		rows = append(rows, row)
+		rs = append(rs, row)
 	}
-	return rows
+	return rs
 }
