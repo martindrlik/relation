@@ -30,14 +30,13 @@ func Dump(r R, paddings ...int) string {
 	sort.Strings(o)
 	var b strings.Builder
 	b.WriteString(dumpattrs(o, pad))
-	b.WriteRune('\n')
 
 	for _, k := range r.keyOrder() {
 		r := r[k]
 		ai := r.attri()
 		for _, t := range r.tuples {
-			b.WriteString(dumptuple(o, ai, t, pad))
 			b.WriteRune('\n')
+			b.WriteString(dumptuple(o, ai, t, pad))
 		}
 	}
 	return b.String()
