@@ -47,3 +47,12 @@ func (r Relation) attri() map[string]int {
 	}
 	return m
 }
+
+func (r R) keyOrder() []string {
+	o := make([]string, 0, len(r))
+	for k := range r {
+		o = append(o, k)
+	}
+	sort.Strings(o)
+	return o
+}

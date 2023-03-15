@@ -16,7 +16,7 @@ func ExampleInsertOne() {
 	fmt.Println(rex.Dump(users, 3, 4, 10))
 	// Output:
 	// age | name | occupation
-	// ✕   | Jake | ✕
 	// 35  | ✕    | ✕
+	// ✕   | Jake | ✕
 	// ✕   | ✕    | developer
 }

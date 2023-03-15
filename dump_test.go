@@ -14,6 +14,6 @@ func ExampleDump() {
 	fmt.Println(rex.Dump(g, 3, 8, 6, 4))
 	// Output:
 	// age | greeting | weight
-	// ✕   | Hello    | 1.5
 	// 35  | ✕        | ✕
+	// ✕   | Hello    | 1.5
 }

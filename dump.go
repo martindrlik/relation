@@ -31,7 +31,9 @@ func Dump(r R, paddings ...int) string {
 	var b strings.Builder
 	b.WriteString(dumpattrs(o, pad))
 	b.WriteRune('\n')
-	for _, r := range r {
+
+	for _, k := range r.keyOrder() {
+		r := r[k]
 		ai := r.attri()
 		for _, t := range r.tuples {
 			b.WriteString(dumptuple(o, ai, t, pad))

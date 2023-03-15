@@ -11,7 +11,7 @@ users.InsertOne(strings.NewReader(`{"age": 35}`)) // duplicate is not inserted
 fmt.Println(rex.Dump(users, 3, 4, 10))
 // Output:
 // age | name | occupation
-// ✕   | Jake | ✕
 // 35  | ✕    | ✕
+// ✕   | Jake | ✕
 // ✕   | ✕    | developer
 ```
