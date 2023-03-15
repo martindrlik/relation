@@ -1,36 +1,31 @@
 package rex
 
 import (
-	"encoding/json"
+	"io"
 )
 
-func (t *Table) InsertOne(s string) *Table {
-	srcm := map[string]any{}
-	err := json.Unmarshal([]byte(s), &srcm)
-	if err != nil {
-		panic(err)
+func (g R) InsertOne(s io.Reader) R {
+	m := mustDecode[map[string]any](s)
+	r := newRelation(m)
+	g.insertRelation(r)
+	return g
+}
+
+func (g R) insertRelation(r Relation) {
+	if len(r.tuples) == 0 {
+		return
 	}
-	ri := t.dataLen()
-	if t.columns == nil {
-		t.columns = columns{}
+	rk := r.key()
+	gr, ok := g[rk]
+	if !ok {
+		g[rk] = Relation{r.attributes, [][]any{r.tuples[0]}}
+		r.tuples = r.tuples[1:]
+		gr = g[rk]
 	}
-	// fill existing columns
-	for name, data := range t.columns {
-		if srcv, ok := srcm[name]; ok {
-			t.columns[name] = append(data, srcv)
-			delete(srcm, name)
-		} else {
-			t.columns[name] = append(data, Empty{})
+	for _, t := range r.tuples {
+		if !gr.contains(t) {
+			gr.tuples = append(gr.tuples, t)
 		}
 	}
-	// add new columns
-	for srcname, srcv := range srcm {
-		data := make([]any, ri+1)
-		for i := 0; i < ri; i++ {
-			data[i] = Empty{}
-		}
-		data[ri] = srcv
-		t.columns[srcname] = data
-	}
-	return t
+	g[rk] = gr
 }

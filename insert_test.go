@@ -1,23 +1,22 @@
 package rex_test
 
 import (
-	"testing"
+	"fmt"
+	"strings"
 
 	"github.com/martindrlik/rex"
 )
 
-func TestInsertOne(t *testing.T) {
-	t.Run("adding columns", func(t *testing.T) {
-		users := rex.Table{}
-		users.InsertOne(`{"name": "Jake"}`)
-		users.InsertOne(`{"bornYear": 2001}`)
-		ac := dump(users.Select())
-		ex := dump([][]any{
-			{rex.Empty{}, "Jake"},
-			{2001, rex.Empty{}},
-		})
-		if ac != ex {
-			t.Errorf("expected\n%vgot\n%v", ex, ac)
-		}
-	})
+func ExampleInsertOne() {
+	users := rex.R{}
+	users.InsertOne(strings.NewReader(`{"name": "Jake"}`))
+	users.InsertOne(strings.NewReader(`{"age": 35}`))
+	users.InsertOne(strings.NewReader(`{"occupation": "developer"}`))
+	users.InsertOne(strings.NewReader(`{"age": 35}`)) // duplicate is not inserted
+	fmt.Println(rex.Dump(users, 3, 4, 10))
+	// Output:
+	// age | name | occupation
+	// ✕   | Jake | ✕
+	// 35  | ✕    | ✕
+	// ✕   | ✕    | developer
 }

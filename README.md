@@ -3,13 +3,15 @@
 Experimental relational NoSQL database. It is my playground for ideas and API will change over time. There is a lot more to do before it can be even considered interesting.
 
 ``` golang
-var users, score rex.Table
-users.InsertOne(`{"username": "Jake"}`)
-score.InsertOne(`{"username": "Jake", "score": 100}`)
-dump(rex.NaturalJoin(&users, &score).
-	Select(
-		rex.Where(`{"score": 100}`), // restriction
-		rex.Project("username")))    // projection
+users := rex.R{}
+users.InsertOne(strings.NewReader(`{"name": "Jake"}`))
+users.InsertOne(strings.NewReader(`{"age": 35}`))
+users.InsertOne(strings.NewReader(`{"occupation": "developer"}`))
+users.InsertOne(strings.NewReader(`{"age": 35}`)) // duplicate is not inserted
+fmt.Println(rex.Dump(users, 3, 4, 10))
 // Output:
-// Jake
+// age | name | occupation
+// ✕   | Jake | ✕
+// 35  | ✕    | ✕
+// ✕   | ✕    | developer
 ```
