@@ -81,18 +81,9 @@ func (r Relation) equals(s Relation) bool {
 		return false
 	}
 	for _, t := range r.tuples {
-		if !s.contains(t) {
+		if !s.tuples.contains(t) {
 			return false
 		}
 	}
 	return true
-}
-
-func (r Relation) contains(t Tuple) bool {
-	for _, rt := range r.tuples {
-		if reflect.DeepEqual(rt, t) {
-			return true
-		}
-	}
-	return false
 }
