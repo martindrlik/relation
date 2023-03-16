@@ -21,6 +21,21 @@ func (r R) Equals(s R) bool {
 	return true
 }
 
+func (r Relation) equals(s Relation) bool {
+	if !reflect.DeepEqual(r.attributes, s.attributes) {
+		return false
+	}
+	if len(r.tuples) != len(s.tuples) {
+		return false
+	}
+	for _, t := range r.tuples {
+		if !s.tuples.contains(t) {
+			return false
+		}
+	}
+	return true
+}
+
 func (r R) attributes() []string {
 	m := map[string]struct{}{}
 	for _, r := range r {
@@ -71,19 +86,4 @@ func (r Relation) attri() map[string]int {
 		m[a] = i
 	}
 	return m
-}
-
-func (r Relation) equals(s Relation) bool {
-	if !reflect.DeepEqual(r.attributes, s.attributes) {
-		return false
-	}
-	if len(r.tuples) != len(s.tuples) {
-		return false
-	}
-	for _, t := range r.tuples {
-		if !s.tuples.contains(t) {
-			return false
-		}
-	}
-	return true
 }
