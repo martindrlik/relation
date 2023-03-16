@@ -2,31 +2,64 @@ package rex
 
 import (
 	"encoding/json"
+	"sort"
 	"strings"
 )
 
-type Insert struct {
+type InsertOptions struct {
 	src map[string]any
 }
 
-func String(s string) func(*Insert) error {
-	return func(i *Insert) error {
+func String(s string) func(*InsertOptions) error {
+	return func(i *InsertOptions) error {
 		i.src = map[string]any{}
 		dec := json.NewDecoder(strings.NewReader(s))
 		return dec.Decode(&i.src)
 	}
 }
 
-func (r R) InsertOne(options ...func(*Insert) error) (R, error) {
-	i := &Insert{}
+func Map(m map[string]any) func(*InsertOptions) error {
+	return func(i *InsertOptions) error {
+		i.src = map[string]any{}
+		for k, v := range m {
+			i.src[k] = v
+		}
+		return nil
+	}
+}
+
+func (r R) Insert(options ...func(*InsertOptions) error) (R, error) {
+	in := &InsertOptions{}
 	for _, option := range options {
-		err := option(i)
+		err := option(in)
 		if err != nil {
 			return R{}, err
 		}
 	}
-	t := newRelation(i.src)
-	r.insertRelation(t)
+
+	s := Relation{}
+	s.attributes = make([]string, 0, len(in.src))
+	for k := range in.src {
+		s.attributes = append(s.attributes, k)
+	}
+	sort.Strings(s.attributes)
+	tuple := make([]any, 0, len(s.attributes))
+	for _, a := range s.attributes {
+		e := in.src[a]
+		switch x := e.(type) {
+		case map[string]any:
+			sr := R{}
+			_, err := sr.Insert(Map(x))
+			if err != nil {
+				return r, err
+			}
+			tuple = append(tuple, sr)
+		default:
+			tuple = append(tuple, x)
+		}
+	}
+	s.tuples = append(s.tuples, tuple)
+	r.insertRelation(s)
 	return r, nil
 }
 
@@ -37,17 +70,16 @@ func (r R) insertRelation(s Relation) {
 	rk := s.key()
 	gr, ok := r[rk]
 	if !ok {
-		r[rk] = Relation{s.attributes, [][]any{s.tuples[0]}}
-		s.tuples = s.tuples[1:]
+		r[rk] = Relation{attributes: s.attributes}
 		gr = r[rk]
 	}
 	for _, t := range s.tuples {
-		gr.insert(t)
+		gr.insertTuple(t)
 	}
 	r[rk] = gr
 }
 
-func (r *Relation) insert(t []any) {
+func (r *Relation) insertTuple(t []any) {
 	if !r.contains(t) {
 		r.tuples = append(r.tuples, t)
 	}

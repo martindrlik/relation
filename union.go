@@ -1,16 +1,21 @@
 package rex
 
 func (r R) Union(s R) R {
-	t := r.Copy()
-	v := s.Copy()
-	for k := range t {
-		if vv, ok := v[k]; ok {
-			t.insertRelation(vv)
-			delete(v, k)
+	r = r.Copy()
+	mr := map[string]Relation{}
+	for k, sr := range s {
+		rr, ok := r[k]
+		if !ok {
+			mr[k] = sr
+			continue
 		}
+		for _, st := range sr.tuples {
+			rr.insertTuple(st)
+		}
+		r[k] = rr
 	}
-	for k, vv := range v {
-		t[k] = vv
+	for k, v := range mr {
+		r[k] = v
 	}
-	return t
+	return r
 }

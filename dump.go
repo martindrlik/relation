@@ -3,37 +3,40 @@ package rex
 import (
 	"bytes"
 	"fmt"
-	"sort"
 	"strings"
-	"sync"
 )
 
-var bufPool = sync.Pool{
-	New: func() any { return new(bytes.Buffer) },
+type DumpOptions struct {
+	padding map[string]int
 }
 
-func Dump(r R, paddings ...int) string {
-	m := map[string]struct{}{}
-	for _, r := range r {
-		for _, a := range r.attributes {
-			m[a] = struct{}{}
+func Pad(name string, pad int) func(*DumpOptions) {
+	return func(do *DumpOptions) {
+		do.padding[name] = pad
+	}
+}
+
+func Dump(r R, options ...func(*DumpOptions)) string {
+	do := &DumpOptions{
+		padding: map[string]int{},
+	}
+	for _, option := range options {
+		option(do)
+	}
+	o := r.attributes()
+	pad := func(a, v string) string {
+		var p int
+		if n, ok := do.padding[a]; ok {
+			p = n
+		} else {
+			p = len([]rune(a))
 		}
-	}
-	if len(m) > len(paddings) {
-		panic(fmt.Sprintf("missing padding for %d attribute(s)", len(m)-len(paddings)))
-	}
-	pad := func(pi int, v string) string {
-		count := paddings[pi] - len([]rune(v))
+		count := p - len([]rune(v))
 		if count <= 0 {
 			return ""
 		}
 		return strings.Repeat(" ", count)
 	}
-	o := make([]string, 0, len(m))
-	for a := range m {
-		o = append(o, a)
-	}
-	sort.Strings(o)
 
 	b := bufPool.Get().(*bytes.Buffer)
 	b.Reset()
@@ -41,18 +44,37 @@ func Dump(r R, paddings ...int) string {
 
 	b.WriteString(dumpattrs(o, pad))
 
+	inner := []R{}
+	ref := func(a any) any {
+		if r, ok := a.(R); ok {
+			inner = append(inner, r)
+			return fmt.Sprintf("*r%d", len(inner))
+		}
+		return a
+	}
+
 	for _, k := range r.keyOrder() {
 		r := r[k]
 		ai := r.attri()
 		for _, t := range r.tuples {
 			b.WriteRune('\n')
-			b.WriteString(dumptuple(o, ai, t, pad))
+			b.WriteString(dumptuple(
+				o,
+				ai,
+				t,
+				ref,
+				pad))
 		}
+	}
+
+	for i, r := range inner {
+		b.WriteString(fmt.Sprintf("\n-- r%d:\n", i+1))
+		b.WriteString(Dump(r, options...))
 	}
 	return b.String()
 }
 
-func dumpattrs(o []string, pad func(pi int, v string) string) string {
+func dumpattrs(o []string, pad func(a, v string) string) string {
 	b := bufPool.Get().(*bytes.Buffer)
 	b.Reset()
 	defer func() { bufPool.Put(b) }()
@@ -63,13 +85,18 @@ func dumpattrs(o []string, pad func(pi int, v string) string) string {
 		}
 		b.WriteString(o[i])
 		if i < len(o)-1 {
-			b.WriteString(pad(i, o[i]))
+			b.WriteString(pad(o[i], o[i]))
 		}
 	}
 	return b.String()
 }
 
-func dumptuple(o []string, ai map[string]int, t []any, pad func(pi int, v string) string) string {
+func dumptuple(
+	o []string,
+	ai map[string]int,
+	t []any,
+	ref func(any) any,
+	pad func(a, v string) string) string {
 	b := bufPool.Get().(*bytes.Buffer)
 	b.Reset()
 	defer func() { bufPool.Put(b) }()
@@ -80,13 +107,13 @@ func dumptuple(o []string, ai map[string]int, t []any, pad func(pi int, v string
 		}
 		var v string
 		if i, ok := ai[o[pi]]; ok {
-			v = fmt.Sprintf("%v", t[i])
+			v = fmt.Sprintf("%v", ref(t[i]))
 		} else {
 			v = "✕"
 		}
 		b.WriteString(v)
 		if pi < len(o)-1 {
-			b.WriteString(pad(pi, v))
+			b.WriteString(pad(o[pi], v))
 		}
 	}
 	return b.String()

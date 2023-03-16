@@ -1,10 +1,11 @@
-# rex
+package rex_test
 
-Experimental relational NoSQL database. It is my playground for ideas and API will change over time. There is a lot more to do before it can be even considered interesting.
+import (
+	"fmt"
 
-## Examples
+	"github.com/martindrlik/rex"
+)
 
-```golang
 func ExampleDump() {
 	users := rex.R{}
 	must(users.Insert(rex.String(`{"name": "Jake"}`)))
@@ -78,4 +79,3 @@ func ExampleUnion() {
 	// ✕   | Olomouc | ✕
 	// ✕   | Prague  | ✕
 }
-```
