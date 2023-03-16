@@ -30,6 +30,15 @@ func ExampleDumpPad() {
 	// ✕         | developer
 }
 
+func ExampleEquals() {
+	u := rex.R{}
+	v := rex.R{}
+	must(u.Insert(rex.String(`{"name": "Jake", "address": {"city": "New York", "street": "Broadway"}}`)))
+	must(v.Insert(rex.String(`{"name": "Jake", "address": {"city": "New York", "street": "Broadway"}}`)))
+	fmt.Println(u.Equals(v))
+	// Output: true
+}
+
 func ExampleInnerRelation() {
 	users := rex.R{}
 	must(users.Insert(rex.String(`{"name": "Jake", "address": {"city": "New York", "street": "Broadway"}}}`)))
@@ -78,4 +87,5 @@ func ExampleUnion() {
 	// ✕   | Olomouc | ✕
 	// ✕   | Prague  | ✕
 }
+
 ```

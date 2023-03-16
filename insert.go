@@ -37,13 +37,14 @@ func (r R) Insert(options ...func(*InsertOptions) error) (R, error) {
 		}
 	}
 
-	s := Relation{}
-	s.attributes = make([]string, 0, len(in.src))
+	s := Relation{
+		attributes: make([]string, 0, len(in.src)),
+	}
 	for k := range in.src {
 		s.attributes = append(s.attributes, k)
 	}
 	sort.Strings(s.attributes)
-	tuple := make([]any, 0, len(s.attributes))
+	tuple := make(Tuple, 0, len(s.attributes))
 	for _, a := range s.attributes {
 		e := in.src[a]
 		switch x := e.(type) {
@@ -74,13 +75,7 @@ func (r R) insertRelation(s Relation) {
 		gr = r[rk]
 	}
 	for _, t := range s.tuples {
-		gr.insertTuple(t)
+		gr.tuples.insert(t)
 	}
 	r[rk] = gr
-}
-
-func (r *Relation) insertTuple(t []any) {
-	if !r.contains(t) {
-		r.tuples = append(r.tuples, t)
-	}
 }

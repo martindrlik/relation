@@ -2,11 +2,24 @@ package rex
 
 import (
 	"bytes"
+	"reflect"
 	"sort"
 )
 
 // R is a set of relations.
 type R map[string]Relation
+
+func (r R) Equals(s R) bool {
+	for len(r) != len(s) {
+		return false
+	}
+	for k, rv := range r {
+		if sv, ok := s[k]; !ok || !rv.equals(sv) {
+			return false
+		}
+	}
+	return true
+}
 
 func (r R) attributes() []string {
 	m := map[string]struct{}{}
@@ -35,7 +48,7 @@ func (r R) keyOrder() []string {
 // Relation is a set of tuples.
 type Relation struct {
 	attributes []string
-	tuples     [][]any
+	tuples     Tuples
 }
 
 func (r Relation) key() string {
@@ -58,4 +71,28 @@ func (r Relation) attri() map[string]int {
 		m[a] = i
 	}
 	return m
+}
+
+func (r Relation) equals(s Relation) bool {
+	if !reflect.DeepEqual(r.attributes, s.attributes) {
+		return false
+	}
+	if len(r.tuples) != len(s.tuples) {
+		return false
+	}
+	for _, t := range r.tuples {
+		if !s.contains(t) {
+			return false
+		}
+	}
+	return true
+}
+
+func (r Relation) contains(t Tuple) bool {
+	for _, rt := range r.tuples {
+		if reflect.DeepEqual(rt, t) {
+			return true
+		}
+	}
+	return false
 }

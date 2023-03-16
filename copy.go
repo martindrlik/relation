@@ -11,9 +11,9 @@ func (r R) Copy() R {
 func (r Relation) Copy() Relation {
 	ca := make([]string, len(r.attributes))
 	copy(ca, r.attributes)
-	ct := make([][]any, len(r.tuples))
+	ct := make(Tuples, len(r.tuples))
 	for i, t := range r.tuples {
-		ct[i] = make([]any, len(t))
+		ct[i] = make(Tuple, len(t))
 		copy(ct[i], t)
 	}
 	return Relation{ca, ct}

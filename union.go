@@ -10,7 +10,7 @@ func (r R) Union(s R) R {
 			continue
 		}
 		for _, st := range sr.tuples {
-			rr.insertTuple(st)
+			rr.tuples.insert(st)
 		}
 		r[k] = rr
 	}
