@@ -1,10 +1,16 @@
 package rex
 
 import (
+	"bytes"
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 )
+
+var bufPool = sync.Pool{
+	New: func() any { return new(bytes.Buffer) },
+}
 
 func Dump(r R, paddings ...int) string {
 	m := map[string]struct{}{}
@@ -28,7 +34,11 @@ func Dump(r R, paddings ...int) string {
 		o = append(o, a)
 	}
 	sort.Strings(o)
-	var b strings.Builder
+
+	b := bufPool.Get().(*bytes.Buffer)
+	b.Reset()
+	defer func() { bufPool.Put(b) }()
+
 	b.WriteString(dumpattrs(o, pad))
 
 	for _, k := range r.keyOrder() {
@@ -43,7 +53,10 @@ func Dump(r R, paddings ...int) string {
 }
 
 func dumpattrs(o []string, pad func(pi int, v string) string) string {
-	var b strings.Builder
+	b := bufPool.Get().(*bytes.Buffer)
+	b.Reset()
+	defer func() { bufPool.Put(b) }()
+
 	for i := 0; i < len(o); i++ {
 		if b.Len() > 0 {
 			b.WriteString(" | ")
@@ -57,7 +70,10 @@ func dumpattrs(o []string, pad func(pi int, v string) string) string {
 }
 
 func dumptuple(o []string, ai map[string]int, t []any, pad func(pi int, v string) string) string {
-	var b strings.Builder
+	b := bufPool.Get().(*bytes.Buffer)
+	b.Reset()
+	defer func() { bufPool.Put(b) }()
+
 	for pi := 0; pi < len(o); pi++ {
 		if b.Len() > 0 {
 			b.WriteString(" | ")
