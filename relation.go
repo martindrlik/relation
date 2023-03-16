@@ -2,7 +2,6 @@ package rex
 
 import (
 	"bytes"
-	"reflect"
 	"sort"
 )
 
@@ -22,8 +21,13 @@ func (r R) Equals(s R) bool {
 }
 
 func (r Relation) equals(s Relation) bool {
-	if !reflect.DeepEqual(r.attributes, s.attributes) {
+	if len(r.attributes) != len(s.attributes) {
 		return false
+	}
+	for i, a := range r.attributes {
+		if a != s.attributes[i] {
+			return false
+		}
 	}
 	if len(r.tuples) != len(s.tuples) {
 		return false
