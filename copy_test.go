@@ -2,17 +2,16 @@ package rex_test
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/martindrlik/rex"
 )
 
 func ExampleCopy() {
 	a := rex.R{}
-	a.InsertOne(strings.NewReader(`{"one": 1, "two": 2}`))
-	a.InsertOne(strings.NewReader(`{"three": 3}`))
+	must(a.InsertOne(rex.String(`{"one": 1, "two": 2}`)))
+	must(a.InsertOne(rex.String(`{"three": 3}`)))
 	b := a.Copy()
-	b.InsertOne(strings.NewReader(`{"four": 4}`))
+	must(b.InsertOne(rex.String(`{"four": 4}`)))
 	fmt.Println(rex.Dump(a, 3, 5, 3))
 	fmt.Println("--")
 	fmt.Println(rex.Dump(b, 4, 3, 5, 3))

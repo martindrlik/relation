@@ -1,31 +1,54 @@
 package rex
 
 import (
-	"io"
+	"encoding/json"
+	"strings"
 )
 
-func (g R) InsertOne(s io.Reader) R {
-	m := mustDecode[map[string]any](s)
-	r := newRelation(m)
-	g.insertRelation(r)
-	return g
+type Insert struct {
+	src map[string]any
 }
 
-func (g R) insertRelation(r Relation) {
-	if len(r.tuples) == 0 {
-		return
+func String(s string) func(*Insert) error {
+	return func(i *Insert) error {
+		i.src = map[string]any{}
+		dec := json.NewDecoder(strings.NewReader(s))
+		return dec.Decode(&i.src)
 	}
-	rk := r.key()
-	gr, ok := g[rk]
-	if !ok {
-		g[rk] = Relation{r.attributes, [][]any{r.tuples[0]}}
-		r.tuples = r.tuples[1:]
-		gr = g[rk]
-	}
-	for _, t := range r.tuples {
-		if !gr.contains(t) {
-			gr.tuples = append(gr.tuples, t)
+}
+
+func (r R) InsertOne(options ...func(*Insert) error) (R, error) {
+	i := &Insert{}
+	for _, option := range options {
+		err := option(i)
+		if err != nil {
+			return R{}, err
 		}
 	}
-	g[rk] = gr
+	t := newRelation(i.src)
+	r.insertRelation(t)
+	return r, nil
+}
+
+func (r R) insertRelation(s Relation) {
+	if len(s.tuples) == 0 {
+		return
+	}
+	rk := s.key()
+	gr, ok := r[rk]
+	if !ok {
+		r[rk] = Relation{s.attributes, [][]any{s.tuples[0]}}
+		s.tuples = s.tuples[1:]
+		gr = r[rk]
+	}
+	for _, t := range s.tuples {
+		gr.insert(t)
+	}
+	r[rk] = gr
+}
+
+func (r *Relation) insert(t []any) {
+	if !r.contains(t) {
+		r.tuples = append(r.tuples, t)
+	}
 }
