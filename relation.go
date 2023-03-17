@@ -20,6 +20,15 @@ func (r R) Equals(s R) bool {
 	return true
 }
 
+// Len returns number of tuples.
+func (r R) Len() int {
+	n := 0
+	for _, r := range r {
+		n += len(r.tuples)
+	}
+	return n
+}
+
 func (r Relation) equals(s Relation) bool {
 	if len(r.attributes) != len(s.attributes) {
 		return false

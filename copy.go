@@ -1,20 +1,21 @@
 package rex
 
 func (r R) Copy() R {
-	c := R{}
+	s := R{}
 	for k, v := range r {
-		c[k] = v.Copy()
+		s[k] = v.Copy()
 	}
-	return c
+	return s
 }
 
 func (r Relation) Copy() Relation {
-	ca := make([]string, len(r.attributes))
-	copy(ca, r.attributes)
-	ct := make(Tuples, len(r.tuples))
+	s := Relation{}
+	s.attributes = make([]string, len(r.attributes))
+	s.tuples = make(Tuples, len(r.tuples))
+	copy(s.attributes, r.attributes)
 	for i, t := range r.tuples {
-		ct[i] = make(Tuple, len(t))
-		copy(ct[i], t)
+		s.tuples[i] = make(Tuple, len(t))
+		copy(s.tuples[i], t)
 	}
-	return Relation{ca, ct}
+	return s
 }

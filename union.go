@@ -2,20 +2,16 @@ package rex
 
 func (r R) Union(s R) R {
 	r = r.Copy()
-	mr := map[string]Relation{}
-	for k, sr := range s {
-		rr, ok := r[k]
-		if !ok {
-			mr[k] = sr
-			continue
+	rextra := map[string]Relation{}
+	for k, v := range s {
+		if rv, ok := r[k]; ok {
+			for _, t := range v.tuples {
+				rv.tuples.insert(t)
+			}
+			r[k] = rv
+		} else {
+			rextra[k] = v
 		}
-		for _, st := range sr.tuples {
-			rr.tuples.insert(st)
-		}
-		r[k] = rr
-	}
-	for k, v := range mr {
-		r[k] = v
 	}
 	return r
 }

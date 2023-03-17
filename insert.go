@@ -1,52 +1,25 @@
 package rex
 
 import (
-	"encoding/json"
 	"sort"
-	"strings"
 )
 
-type InsertOptions struct {
-	src map[string]any
-}
-
-func String(s string) func(*InsertOptions) error {
-	return func(i *InsertOptions) error {
-		i.src = map[string]any{}
-		dec := json.NewDecoder(strings.NewReader(s))
-		return dec.Decode(&i.src)
-	}
-}
-
-func Map(m map[string]any) func(*InsertOptions) error {
-	return func(i *InsertOptions) error {
-		i.src = map[string]any{}
-		for k, v := range m {
-			i.src[k] = v
-		}
-		return nil
-	}
-}
-
 func (r R) Insert(options ...func(*InsertOptions) error) (R, error) {
-	in := &InsertOptions{}
-	for _, option := range options {
-		err := option(in)
-		if err != nil {
-			return R{}, err
-		}
+	opt, err := buildInsertOptions(options...)
+	if err != nil {
+		return R{}, err
 	}
 
 	s := Relation{
-		attributes: make([]string, 0, len(in.src)),
+		attributes: make([]string, 0, len(opt.src)),
 	}
-	for k := range in.src {
+	for k := range opt.src {
 		s.attributes = append(s.attributes, k)
 	}
 	sort.Strings(s.attributes)
 	tuple := make(Tuple, 0, len(s.attributes))
 	for _, a := range s.attributes {
-		e := in.src[a]
+		e := opt.src[a]
 		switch x := e.(type) {
 		case map[string]any:
 			sr := R{}

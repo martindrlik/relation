@@ -40,14 +40,14 @@ func ExampleEquals() {
 	// Output: true
 }
 
-func ExampleInnerRelation() {
+func ExampleDumpNested() {
 	users := rex.R{}
 	must(users.Insert(rex.String(`{"name": "Jake", "address": {"city": "New York", "street": "Broadway"}}}`)))
 	fmt.Println(rex.Dump(users, rex.Pad("city", 8)))
 	// Output:
 	// address | name
-	// *r1     | Jake
-	// -- r1:
+	// *R1     | Jake
+	// -- R1:
 	// city     | street
 	// New York | Broadway
 }
