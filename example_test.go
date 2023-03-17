@@ -31,15 +31,6 @@ func ExampleDumpPad() {
 	// ✕         | developer
 }
 
-func ExampleEquals() {
-	u := rex.R{}
-	v := rex.R{}
-	must(u.Insert(rex.String(`{"name": "Jake", "address": {"city": "New York", "street": "Broadway"}}`)))
-	must(v.Insert(rex.String(`{"name": "Jake", "address": {"city": "New York", "street": "Broadway"}}`)))
-	fmt.Println(u.Equals(v))
-	// Output: true
-}
-
 func ExampleDumpNested() {
 	users := rex.R{}
 	must(users.Insert(rex.String(`{"name": "Jake", "address": {"city": "New York", "street": "Broadway"}}}`)))
@@ -50,6 +41,15 @@ func ExampleDumpNested() {
 	// -- R1:
 	// city     | street
 	// New York | Broadway
+}
+
+func ExampleEquals() {
+	u := rex.R{}
+	v := rex.R{}
+	must(u.Insert(rex.String(`{"name": "Jake", "address": {"city": "New York", "street": "Broadway"}}`)))
+	must(v.Insert(rex.String(`{"name": "Jake", "address": {"street": "Broadway", "city": "New York"}}`)))
+	fmt.Println(u.Equals(v))
+	// Output: true
 }
 
 func ExampleCopy() {
