@@ -1,7 +1,7 @@
 package rex
 
 func (r R) Union(s R) R {
-	r = r.Copy()
+	r = r.copy()
 	rextra := map[string]Relation{}
 	for k, v := range s {
 		if rv, ok := r[k]; ok {

@@ -1,14 +1,14 @@
 package rex
 
-func (r R) Copy() R {
+func (r R) copy() R {
 	s := R{}
 	for k, v := range r {
-		s[k] = v.Copy()
+		s[k] = v.copy()
 	}
 	return s
 }
 
-func (r Relation) Copy() Relation {
+func (r Relation) copy() Relation {
 	s := Relation{}
 	s.attributes = make([]string, len(r.attributes))
 	s.tuples = make(Tuples, len(r.tuples))

@@ -19,17 +19,6 @@ func ExampleDump() {
 	// ✕   | ✕    | developer
 }
 
-func ExampleDumpPad() {
-	users := rex.R{}
-	must(users.Insert(rex.String(`{"name": "Gwendolyn"}`)))
-	must(users.Insert(rex.String(`{"occupation": "developer"}`)))
-	fmt.Println(rex.Dump(users, rex.Pad("name", 9)))
-	// Output:
-	// name      | occupation
-	// Gwendolyn | ✕
-	// ✕         | developer
-}
-
 func ExampleDumpNested() {
 	users := rex.R{}
 	must(users.Insert(rex.String(`{"name": "Jake", "address": {"city": "New York", "street": "Broadway"}}}`)))
@@ -43,32 +32,28 @@ func ExampleDumpNested() {
 }
 
 func ExampleEquals() {
-	u := rex.R{}
-	v := rex.R{}
-	must(u.Insert(rex.String(`{"name": "Jake", "address": {"city": "New York", "street": "Broadway"}}`)))
-	must(v.Insert(rex.String(`{"name": "Jake", "address": {"street": "Broadway", "city": "New York"}}`)))
-	fmt.Println(u.Equals(v))
+	r := rex.R{}
+	s := rex.R{}
+	must(r.Insert(rex.String(`{"name": "Jake", "address": {"city": "New York", "street": "Broadway"}}`)))
+	must(s.Insert(rex.String(`{"name": "Jake", "address": {"street": "Broadway", "city": "New York"}}`)))
+	fmt.Println(r.Equals(s))
 	// Output: true
 }
 
-func ExampleCopy() {
-	a := rex.R{}
-	must(a.Insert(rex.String(`{"one": 1, "two": 2}`)))
-	must(a.Insert(rex.String(`{"three": 3}`)))
-	b := a.Copy()
-	must(b.Insert(rex.String(`{"four": 4}`)))
-	fmt.Println(rex.Dump(a))
-	fmt.Println("--")
-	fmt.Println(rex.Dump(b))
+func ExampleExcept() {
+	r := rex.R{}
+	s := rex.R{}
+	must(r.Insert(rex.String(`{"name": "Jake", "address": {"city": "New York", "street": "Broadway"}}`)))
+	must(r.Insert(rex.String(`{"name": "Mia", "address": {"city": "New York", "street": "Broadway"}}`)))
+	must(s.Insert(rex.String(`{"name": "Jake", "address": {"street": "Broadway", "city": "New York"}}`)))
+	t := r.Except(s)
+	fmt.Println(rex.Dump(t))
 	// Output:
-	// one | three | two
-	// 1   | ✕     | 2
-	// ✕   | 3     | ✕
-	// --
-	// four | one | three | two
-	// 4    | ✕   | ✕     | ✕
-	// ✕    | 1   | ✕     | 2
-	// ✕    | ✕   | 3     | ✕
+	// address | name
+	// *R1     | Mia
+	// -- R1:
+	// city | street
+	// New York | Broadway
 }
 
 func ExampleUnion() {
@@ -87,5 +72,4 @@ func ExampleUnion() {
 	// ✕   | Olomouc | ✕
 	// ✕   | Prague  | ✕
 }
-
 ```

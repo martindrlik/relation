@@ -29,6 +29,19 @@ func (r R) Len() int {
 	return n
 }
 
+func (r R) IsEmpty() bool {
+	for _, r := range r {
+		if !r.isEmpty() {
+			return false
+		}
+	}
+	return true
+}
+
+func (r Relation) isEmpty() bool {
+	return len(r.tuples) == 0
+}
+
 func (r Relation) equals(s Relation) bool {
 	if len(r.attributes) != len(s.attributes) {
 		return false
