@@ -73,3 +73,18 @@ func ExampleUnion() {
 	// ✕   | Olomouc | ✕
 	// ✕   | Prague  | ✕
 }
+
+func ExampleUnion2() {
+	r := rex.R{}
+	s := rex.R{}
+	must(r.Insert(rex.String(`{"a": 1, "b": 2}`)))
+	must(s.Insert(rex.String(`{"b": 2, "c": 3}`)))
+	must(s.Insert(rex.String(`{"b": 3}`)))
+	t := r.Union(s)
+	fmt.Println(rex.Dump(t, rex.Pad("city", 7)))
+	// Output:
+	// a | b | c
+	// 1 | 2 | ✕
+	// ✕ | 3 | ✕
+	// ✕ | 2 | 3
+}

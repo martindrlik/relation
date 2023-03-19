@@ -5,6 +5,7 @@ Experimental relational NoSQL database. It is my playground for ideas and API wi
 ## Examples
 
 ```golang
+
 func ExampleDump() {
 	users := rex.R{}
 	must(users.Insert(rex.String(`{"name": "Jake"}`)))
@@ -71,5 +72,20 @@ func ExampleUnion() {
 	// 30  | ✕       | Aya
 	// ✕   | Olomouc | ✕
 	// ✕   | Prague  | ✕
+}
+
+func ExampleUnion2() {
+	r := rex.R{}
+	s := rex.R{}
+	must(r.Insert(rex.String(`{"a": 1, "b": 2}`)))
+	must(s.Insert(rex.String(`{"b": 2, "c": 3}`)))
+	must(s.Insert(rex.String(`{"b": 3}`)))
+	t := r.Union(s)
+	fmt.Println(rex.Dump(t, rex.Pad("city", 7)))
+	// Output:
+	// a | b | c
+	// 1 | 2 | ✕
+	// ✕ | 3 | ✕
+	// ✕ | 2 | 3
 }
 ```

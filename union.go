@@ -2,7 +2,7 @@ package rex
 
 func (r R) Union(s R) R {
 	r = r.copy()
-	rextra := map[string]Relation{}
+	sextra := map[string]Relation{}
 	for k, v := range s {
 		if rv, ok := r[k]; ok {
 			for _, t := range v.tuples {
@@ -10,8 +10,11 @@ func (r R) Union(s R) R {
 			}
 			r[k] = rv
 		} else {
-			rextra[k] = v
+			sextra[k] = v
 		}
+	}
+	for k, v := range sextra {
+		r[k] = v.copy()
 	}
 	return r
 }
