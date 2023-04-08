@@ -88,3 +88,14 @@ func ExampleUnion2() {
 	// ✕ | 3 | ✕
 	// ✕ | 2 | 3
 }
+
+func ExampleWhere() {
+	r := rex.R{}
+	must(r.Insert(rex.String(`{"name": "Jake", "age": 35}`)))
+	must(r.Insert(rex.String(`{"name": "Mia", "age": 40}`)))
+	r = r.Where(rex.GreaterThan("age", 35.0))
+	fmt.Println(rex.Dump(r))
+	// Output:
+	// age | name
+	// 40  | Mia
+}
