@@ -6,75 +6,88 @@ import (
 	"github.com/martindrlik/rex"
 )
 
-func TestInsert(t *testing.T) {
-	t.Run("duplicate", func(t *testing.T) {
-		type tc struct {
-			name string
-			json []string
+func TestEquals(t *testing.T) {
+	t.Run("not equals", func(t *testing.T) {
+		r := rex.NewRelation()
+		s := rex.NewRelation()
+		r.InsertOne(city("New York"))
+		s.InsertOne(city("Olomouc"))
+		if r.Equals(s) {
+			t.Error("expected to be not equal")
 		}
-		for _, tc := range []tc{
-			{"simple", []string{`{"name": "Jake"}`, `{"name": "Jake"}`}},
-			{"nested", []string{`{"address": {"city": "New York"}}`, `{"address": {"city": "New York"}}`}},
-			{"nested unordered", []string{
-				`{"address": {"city": "New York", "street": "Broadway"}}`,
-				`{"address": {"street": "Broadway", "city": "New York"}}`}},
-		} {
-			r := rex.R{}
-			for _, s := range tc.json {
-				must(r.Insert(rex.String(s)))
-			}
-			if n := r.Len(); n != 1 {
-				t.Errorf("[%s] expected one tuple got %v", tc.name, n)
-			}
+	})
+	t.Run("not equals nested", func(t *testing.T) {
+		r := rex.NewRelation().InsertOne(
+			city("New York"),
+			streets(rex.NewRelation().
+				InsertOne(street("Broadway")).
+				InsertOne(street("Park Avenue"))))
+		s := rex.NewRelation().InsertOne(
+			city("New York"),
+			streets(rex.NewRelation().
+				InsertOne(street("Broadway")).
+				InsertOne(street("St. Mark’s Place"))))
+		if r.Equals(s) {
+			t.Error("expected to be not equal")
+		}
+	})
+	t.Run("equals", func(t *testing.T) {
+		r := rex.NewRelation()
+		s := rex.NewRelation()
+		r.InsertOne(city("New York"))
+		s.InsertOne(city("New York"))
+		if !r.Equals(s) {
+			t.Error("expected to be equal")
+		}
+	})
+	t.Run("equals nested", func(t *testing.T) {
+		r := rex.NewRelation().InsertOne(
+			city("New York"),
+			streets(rex.NewRelation().
+				InsertOne(street("Broadway")).
+				InsertOne(street("Park Avenue"))))
+		s := rex.NewRelation().InsertOne(
+			city("New York"),
+			streets(rex.NewRelation().
+				InsertOne(street("Broadway")).
+				InsertOne(street("Park Avenue"))))
+		if !r.Equals(s) {
+			t.Error("expected to be equal")
 		}
 	})
 }
 
-func TestEquals(t *testing.T) {
-	u := rex.R{}
-	v := rex.R{}
-	must(u.Insert(rex.String(`{"address": {"city": "New York", "street": "Broadway", "x": {}}}`)))
-	must(v.Insert(rex.String(`{"address": {"city": "New York", "street": "Broadway", "x": {}}}`)))
-	if !u.Equals(v) {
-		t.Errorf("u should be equal to v")
+func city(city any) func() (string, any) {
+	return func() (string, any) {
+		return "city", city
 	}
 }
 
-func TestNotEquals(t *testing.T) {
-	t.Run("value", func(t *testing.T) {
-		u := rex.R{}
-		v := rex.R{}
-		must(u.Insert(rex.String(`{"name": "Jake"}`)))
-		must(v.Insert(rex.String(`{"name": "Luke"}`)))
-		if u.Equals(v) {
-			t.Errorf("u should not be equal to v")
-		}
-	})
-	t.Run("attributes", func(t *testing.T) {
-		u := rex.R{}
-		v := rex.R{}
-		must(u.Insert(rex.String(`{"name": "Jake"}`)))
-		must(v.Insert(rex.String(`{"username": "Jake"}`)))
-		if u.Equals(v) {
-			t.Errorf("u should not be equal to v")
-		}
-	})
-	t.Run("attributes 2", func(t *testing.T) {
-		u := rex.R{}
-		v := rex.R{}
-		must(u.Insert(rex.String(`{"name": "Jake"}`)))
-		must(v.Insert(rex.String(`{"username": "Jake", "age": 35}`)))
-		if u.Equals(v) {
-			t.Errorf("u should not be equal to v")
-		}
-	})
-	t.Run("nested", func(t *testing.T) {
-		u := rex.R{}
-		v := rex.R{}
-		must(u.Insert(rex.String(`{"address": {"city": "New York", "street": "Broadway"}}`)))
-		must(v.Insert(rex.String(`{"address": {"city": "New York", "street": "Park Avenue"}}`)))
-		if u.Equals(v) {
-			t.Errorf("u should not be equal to v")
-		}
-	})
+func street(street any) func() (string, any) {
+	return func() (string, any) {
+		return "street", street
+	}
+}
+
+func streets(streets any) func() (string, any) {
+	return func() (string, any) {
+		return "streets", streets
+	}
+}
+
+func bornYear(year int) func() (string, any) {
+	return func() (string, any) {
+		return "bornYear", year
+	}
+}
+
+func name(name string) func() (string, any) {
+	return func() (string, any) {
+		return "name", name
+	}
+}
+
+func attr(fn func() (string, any)) string {
+	a, _ := fn()
+	return a
 }

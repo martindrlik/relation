@@ -1,115 +1,143 @@
 package rex
 
 import (
-	"bytes"
+	"reflect"
 	"sort"
+	"strings"
 )
 
-// R is a set of relations.
-type R map[string]Relation
+type Relation struct {
+	relations map[string]*relation
+}
 
-func (r R) Equals(s R) bool {
-	for len(r) != len(s) {
+func NewRelation() *Relation {
+	return &Relation{
+		relations: map[string]*relation{},
+	}
+}
+
+// Equals returns true if compared relations are equal and
+// returns false otherwise.
+func (r *Relation) Equals(s *Relation) bool {
+	if r.len() != s.len() {
 		return false
 	}
-	for k, rv := range r {
-		if sv, ok := s[k]; !ok || !rv.equals(sv) {
+	for k, r := range r.relations {
+		s, ok := s.relations[k]
+		if !ok {
+			return false
+		}
+		if !r.equals(s) {
 			return false
 		}
 	}
 	return true
 }
 
-// Len returns number of tuples.
-func (r R) Len() int {
-	n := 0
-	for _, r := range r {
-		n += len(r.tuples)
-	}
-	return n
+// len returns number of stored relations.
+func (r *Relation) len() int {
+	return len(r.relations)
 }
 
-func (r R) IsEmpty() bool {
-	for _, r := range r {
-		if !r.isEmpty() {
-			return false
-		}
-	}
-	return true
+type relation struct {
+	tuples []map[string]any
 }
 
-func (r Relation) isEmpty() bool {
-	return len(r.tuples) == 0
+func newRelation() *relation {
+	return &relation{
+		tuples: []map[string]any{},
+	}
 }
 
-func (r Relation) equals(s Relation) bool {
-	if len(r.attributes) != len(s.attributes) {
-		return false
-	}
-	for i, a := range r.attributes {
-		if a != s.attributes[i] {
-			return false
-		}
-	}
-	if len(r.tuples) != len(s.tuples) {
+func (r *relation) equals(s *relation) bool {
+	if r.len() != s.len() {
 		return false
 	}
 	for _, t := range r.tuples {
-		if !s.tuples.contains(t) {
+		if !s.hasTuple(t) {
 			return false
 		}
 	}
 	return true
 }
 
-func (r R) attributes() []string {
-	m := map[string]struct{}{}
-	for _, r := range r {
-		for _, a := range r.attributes {
-			m[a] = struct{}{}
+func (r *relation) hasTuple(tuple map[string]any) bool {
+	for _, t := range r.tuples {
+		if tupleEquals(t, tuple) {
+			return true
 		}
 	}
-	o := make([]string, 0, len(m))
+	return false
+}
+
+func tupleEquals(a, b map[string]any) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for k, v := range a {
+		w, ok := b[k]
+		if !ok {
+			return false
+		}
+		if !valueEquals(v, w) {
+			return false
+		}
+	}
+	return true
+}
+
+func valueEquals(u, v any) bool {
+	if u, ok := u.(*Relation); ok {
+		v, ok := v.(*Relation)
+		if !ok || !u.Equals(v) {
+			return false
+		}
+	}
+	return reflect.DeepEqual(u, v)
+
+}
+
+// len returns number of stored tuples.
+func (r *relation) len() int { return len(r.tuples) }
+
+func keys[T any](m map[string]T) []string {
+	s := make([]string, 0, len(m))
 	for k := range m {
-		o = append(o, k)
+		s = append(s, k)
 	}
-	sort.Strings(o)
-	return o
+	return s
 }
 
-func (r R) keyOrder() []string {
-	o := make([]string, 0, len(r))
-	for k := range r {
-		o = append(o, k)
-	}
-	sort.Strings(o)
-	return o
-}
-
-// Relation is a set of tuples.
-type Relation struct {
-	attributes []string
-	tuples     Tuples
-}
-
-func (r Relation) key() string {
-	b := bufPool.Get().(*bytes.Buffer)
-	b.Reset()
-	defer func() { bufPool.Put(b) }()
-
-	for _, k := range r.attributes {
+func key(s []string) string {
+	sort.Strings(s)
+	b := strings.Builder{}
+	for _, s := range s {
 		if b.Len() > 0 {
-			b.WriteRune('|')
+			b.WriteString("|")
 		}
-		b.WriteString(k)
+		b.WriteString(s)
 	}
 	return b.String()
 }
 
-func (r Relation) attri() map[string]int {
-	m := map[string]int{}
-	for i, a := range r.attributes {
-		m[a] = i
+func (r *Relation) InsertTuple(tuple map[string]any) *Relation {
+	k := key(keys(tuple))
+	if _, ok := r.relations[k]; !ok {
+		r.relations[k] = newRelation()
 	}
-	return m
+	s := r.relations[k]
+	if !s.hasTuple(tuple) {
+		s.tuples = append(s.tuples, tuple)
+	}
+	return r
+}
+
+func (r *Relation) InsertOne(pairs ...func() (string, any)) *Relation {
+	m := map[string]any{}
+	for _, p := range pairs {
+		k, v := p()
+		m[k] = v
+	}
+	r.InsertTuple(m)
+	return r
 }
