@@ -91,3 +91,8 @@ func attr(fn func() (string, any)) string {
 	a, _ := fn()
 	return a
 }
+
+func value(fn func() (string, any)) any {
+	_, v := fn()
+	return v
+}
