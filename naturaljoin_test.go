@@ -1,35 +1,10 @@
-# rex
+package rex_test
 
-Experimental relational NoSQL database. It is my playground for ideas and API will change over time. There is a lot more to do before it can be even considered interesting.
+import (
+	"testing"
 
-## Examples
-
-```go
-func TestProject(t *testing.T) {
-	r := rex.NewRelation()
-	s := rex.NewRelation()
-	bornYear := bornYear(1980)
-	r.InsertOne(bornYear)
-	s.InsertOne(bornYear, name("Jake"))
-	if !r.Equals(s.Project(attr(bornYear))) {
-		t.Error("expected equal after projection")
-	}
-}
-
-func TestRestrict(t *testing.T) {
-	kristen := name("Kristen")
-	r := rex.NewRelation().
-		InsertOne(kristen, bornYear(1990))
-	s := rex.NewRelation().
-		InsertOne(name("Jake"), bornYear(1980)).
-		InsertOne(name("Lee"), bornYear(1979)).
-		InsertOne(kristen, bornYear(1990))
-	if !r.Equals(s.Restrict(func(tuple map[string]any) bool {
-		return tuple[attr(kristen)] == value(kristen)
-	})) {
-		t.Error("expected equal after restriction")
-	}
-}
+	"github.com/martindrlik/rex"
+)
 
 func TestNaturalJoin(t *testing.T) {
 	employee := rex.NewRelation().
@@ -51,4 +26,21 @@ func TestNaturalJoin(t *testing.T) {
 		t.Error("expected equal after natural join")
 	}
 }
-```
+
+func empId(id int) func() (string, any) {
+	return func() (string, any) {
+		return "empId", id
+	}
+}
+
+func deptName(dept string) func() (string, any) {
+	return func() (string, any) {
+		return "deptName", dept
+	}
+}
+
+func manager(name string) func() (string, any) {
+	return func() (string, any) {
+		return "manager", name
+	}
+}
