@@ -141,3 +141,18 @@ func (r *Relation) InsertOne(pairs ...func() (string, any)) *Relation {
 	r.InsertTuple(m)
 	return r
 }
+
+func (r *Relation) InsertMany(pairs ...[]func() (string, any)) *Relation {
+	for _, pairs := range pairs {
+		r.InsertOne(pairs...)
+	}
+	return r
+}
+
+func One(pairs ...func() (string, any)) []func() (string, any) {
+	s := []func() (string, any){}
+	for _, p := range pairs {
+		s = append(s, p)
+	}
+	return s
+}
