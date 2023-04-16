@@ -12,11 +12,13 @@ func (r *Relation) Union(s *Relation) *Relation {
 	return t
 }
 
-func (r *relation) union(s *relation) []map[string]any {
-	t := []map[string]any{}
-	add := func(tuples []tuple) {
+func (r *relation) union(s *relation) []tuple {
+	t := []tuple{}
+	add := func(tuples tuples) {
 		for _, v := range tuples {
-			t = append(t, v.shallowCopy())
+			for _, v := range v {
+				t = append(t, v.shallowCopy())
+			}
 		}
 	}
 	add(r.tuples)

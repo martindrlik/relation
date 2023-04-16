@@ -12,13 +12,17 @@ func (r *Relation) NaturalJoin(s *Relation) *Relation {
 	return t
 }
 
-func (r *relation) naturalJoin(s *relation, reduce map[string]struct{}) []map[string]any {
-	t := []map[string]any{}
+func (r *relation) naturalJoin(s *relation, reduce map[string]struct{}) []tuple {
+	t := []tuple{}
 	for _, r := range r.tuples {
-		rr := reduceTuple(r, reduce)
-		for _, s := range s.tuples {
-			if tupleEquals(rr, reduceTuple(s, reduce)) {
-				t = append(t, join(r, s))
+		for _, r := range r {
+			rr := reduceTuple(r, reduce)
+			for _, s := range s.tuples {
+				for _, s := range s {
+					if tupleEquals(rr, reduceTuple(s, reduce)) {
+						t = append(t, join(r, s))
+					}
+				}
 			}
 		}
 	}
@@ -27,31 +31,33 @@ func (r *relation) naturalJoin(s *relation, reduce map[string]struct{}) []map[st
 
 func sameAttrs(r, s *relation) map[string]struct{} {
 	m := map[string]struct{}{}
-	for k := range r.tuples[0] {
-		if _, ok := s.tuples[0][k]; ok {
+	rt := r.tuples.first()
+	st := s.tuples.first()
+	for k := range rt {
+		if _, ok := st[k]; ok {
 			m[k] = struct{}{}
 		}
 	}
 	return m
 }
 
-func reduceTuple(tuple map[string]any, reduce map[string]struct{}) map[string]any {
-	m := map[string]any{}
+func reduceTuple(t tuple, reduce map[string]struct{}) tuple {
+	v := tuple{}
 	for k := range reduce {
-		if v, ok := tuple[k]; ok {
-			m[k] = v
+		if w, ok := t[k]; ok {
+			v[k] = w
 		}
 	}
-	return m
+	return v
 }
 
-func join(a, b map[string]any) map[string]any {
-	m := map[string]any{}
+func join(a, b tuple) tuple {
+	t := tuple{}
 	for k, v := range a {
-		m[k] = v
+		t[k] = v
 	}
 	for k, v := range b {
-		m[k] = v
+		t[k] = v
 	}
-	return m
+	return t
 }

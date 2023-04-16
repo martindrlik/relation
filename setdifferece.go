@@ -15,8 +15,10 @@ func (r *Relation) SetDifference(s *Relation) *Relation {
 func (r *relation) setDifference(s *relation) []tuple {
 	t := []tuple{}
 	for _, r := range r.tuples {
-		if !s.hasTuple(r) {
-			t = append(t, r)
+		for _, r := range r {
+			if !s.hasTuple(r) {
+				t = append(t, r)
+			}
 		}
 	}
 	return t

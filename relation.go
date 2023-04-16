@@ -34,6 +34,34 @@ func (r *Relation) Equals(s *Relation) bool {
 	return true
 }
 
+func (r *Relation) attributes() map[string]struct{} {
+	m := map[string]struct{}{}
+	for _, r := range r.relations {
+		for _, r := range r.tuples {
+			for _, r := range r {
+				for k := range r {
+					m[k] = struct{}{}
+				}
+				break
+			}
+		}
+	}
+	return m
+}
+
+func (r *Relation) key() string {
+	a := keys(r.attributes())
+	sort.Strings(a)
+	k := strings.Builder{}
+	k.WriteString("{")
+	for _, a := range a {
+		k.WriteString(a)
+		k.WriteString("|")
+	}
+	k.WriteString("}")
+	return k.String()
+}
+
 // len returns number of stored relations.
 func (r *Relation) len() int {
 	return len(r.relations)
@@ -54,17 +82,25 @@ func (r *relation) equals(s *relation) bool {
 		return false
 	}
 	for _, t := range r.tuples {
-		if !s.hasTuple(t) {
-			return false
+		for _, t := range t {
+			if !s.hasTuple(t) {
+				return false
+			}
 		}
 	}
 	return true
 }
 
-func (r *relation) hasTuple(tuple map[string]any) bool {
-	for _, t := range r.tuples {
-		if tupleEquals(t, tuple) {
+func (r *relation) hasTuple(t tuple) bool {
+	k, isPartial := t.key()
+	if v, ok := r.tuples[k]; ok {
+		if !isPartial {
 			return true
+		}
+		for _, v := range v {
+			if tupleEquals(t, v) {
+				return true
+			}
 		}
 	}
 	return false
@@ -120,14 +156,15 @@ func key(s []string) string {
 	return b.String()
 }
 
-func (r *Relation) InsertTuple(tuple map[string]any) *Relation {
-	k := key(keys(tuple))
+func (r *Relation) InsertTuple(t map[string]any) *Relation {
+	k := key(keys(t))
 	if _, ok := r.relations[k]; !ok {
 		r.relations[k] = newRelation()
 	}
 	s := r.relations[k]
-	if !s.hasTuple(tuple) {
-		s.tuples = append(s.tuples, tuple)
+	if !s.hasTuple(t) {
+		k, _ := tuple(t).key()
+		s.tuples[k] = append(s.tuples[k], t)
 	}
 	return r
 }
