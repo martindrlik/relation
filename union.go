@@ -14,9 +14,9 @@ func (r *Relation) Union(s *Relation) *Relation {
 
 func (r *relation) union(s *relation) []map[string]any {
 	t := []map[string]any{}
-	add := func(tuples []map[string]any) {
+	add := func(tuples []tuple) {
 		for _, v := range tuples {
-			t = append(t, tuple(v).shallowCopy())
+			t = append(t, v.shallowCopy())
 		}
 	}
 	add(r.tuples)

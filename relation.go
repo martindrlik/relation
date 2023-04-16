@@ -40,12 +40,12 @@ func (r *Relation) len() int {
 }
 
 type relation struct {
-	tuples []map[string]any
+	tuples tuples
 }
 
 func newRelation() *relation {
 	return &relation{
-		tuples: []map[string]any{},
+		tuples: tuples{},
 	}
 }
 

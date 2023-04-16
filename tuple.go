@@ -1,6 +1,9 @@
 package rex
 
-type tuple map[string]any
+type (
+	tuple  map[string]any
+	tuples []tuple
+)
 
 func (t tuple) shallowCopy() tuple {
 	v := map[string]any{}
