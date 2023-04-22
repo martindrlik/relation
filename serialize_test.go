@@ -1,11 +1,12 @@
-# rex
+package rex_test
 
-Experimental relational NoSQL database. It is my playground for ideas and API will change over time. There is a lot more to do before it can be even considered interesting.
+import (
+	"os"
 
-## Example
+	"github.com/martindrlik/rex"
+)
 
-```
-func Example() {
+func ExampleSerialize() {
 	rex.NewRelation().
 		InsertOne(name("Jake"), bornYear(1980)).
 		InsertOne(name("Lee"), bornYear(1979)).
@@ -16,4 +17,3 @@ func Example() {
 	// {"bornYear": 1980, "name": "Jake"},
 	// {"bornYear": 1990, "name": "Kristen"}]
 }
-```
