@@ -12,9 +12,21 @@ func BenchmarkInsertTupleTo1000(b *testing.B) {
 	for i := 0; i < 1000; i++ {
 		r.InsertOne(num(i))
 	}
-	item := map[string]any{"n": 1000}
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		r.InsertTuple(item)
+		r.InsertTuple(map[string]any{"n": 1000 + n})
+	}
+}
+
+func BenchmarkUnion1000(b *testing.B) {
+	r := rex.NewRelation()
+	s := rex.NewRelation()
+	for i := 0; i < 1000; i++ {
+		r.InsertOne(func() (string, any) { return "id", i })
+		s.InsertOne(func() (string, any) { return "id", i + 1000 })
+	}
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		r.Union(s)
 	}
 }

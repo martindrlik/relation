@@ -7,7 +7,7 @@ import (
 	"github.com/martindrlik/rex"
 )
 
-func Example() {
+func ExampleNaturalJoin() {
 	names := rex.NewRelation().InsertManyJson(strings.NewReader(`[
 		{"id": 1, "name": "Lee"},
 		{"id": 2, "name": "Jake"},
