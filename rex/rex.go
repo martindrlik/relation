@@ -9,8 +9,10 @@ import (
 )
 
 var (
-	union       = flag.Bool("union", false, "")
-	naturaljoin = flag.Bool("naturaljoin", false, "")
+	intersect     = flag.Bool("intersect", false, "")
+	naturaljoin   = flag.Bool("naturaljoin", false, "")
+	setdifference = flag.Bool("setdifference", false, "")
+	union         = flag.Bool("union", false, "")
 )
 
 func main() {
@@ -24,11 +26,17 @@ func main() {
 	}
 	r := s[0]
 	for i := 1; i < len(s); i++ {
-		if *union {
-			r = r.Union(s[i])
+		if *intersect {
+			r = r.Intersect(s[i])
 		}
 		if *naturaljoin {
 			r = r.NaturalJoin(s[i])
+		}
+		if *setdifference {
+			r = r.SetDifference(s[i])
+		}
+		if *union {
+			r = r.Union(s[i])
 		}
 	}
 	r.Serialize(os.Stdout)

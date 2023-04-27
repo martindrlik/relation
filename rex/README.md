@@ -1,15 +1,7 @@
 # rex command
 
-## Example
+## Install
 
-```
-% cat birthday.json 
-[{"name":"Jake","born":{"year":1980}},
- {"name":"Kristen","born":{"year":1990}}]
-% cat names.json 
-[{"name":"Jake"},{"name":"Kristen"}]
-% rex -naturaljoin birthday.json names.json 
-[{"born": {"year": 1980}, "name": "Jake"},
-{"born": {"year": 1990}, "name": "Kristen"}]
-%
+``` zsh
+john@example dir % go install github.com/martindrlik/rex/rex@latest
 ```
