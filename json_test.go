@@ -26,3 +26,12 @@ func TestInsertManyJson(t *testing.T) {
 		t.Error("expected equal after insert many json")
 	}
 }
+
+func TestInsertOneJsonNested(t *testing.T) {
+	r := rex.NewRelation().InsertOneJson(strings.NewReader(`{"name": "Jake", "born": {"year": 1980}}`))
+	y := rex.NewRelation().InsertOneJson(strings.NewReader(`{"year": 1980}`))
+	expected := rex.NewRelation().InsertOne(name("Jake"), func() (string, any) { return "born", y })
+	if !expected.Equals(r) {
+		t.Error("expected equal after insert one json nested")
+	}
+}

@@ -157,6 +157,7 @@ func key(s []string) string {
 }
 
 func (r *Relation) InsertTuple(t map[string]any) *Relation {
+	t = resolveNestedRelation(t)
 	k := key(keys(t))
 	if _, ok := r.relations[k]; !ok {
 		r.relations[k] = newRelation()
@@ -167,6 +168,25 @@ func (r *Relation) InsertTuple(t map[string]any) *Relation {
 		s.tuples[k] = append(s.tuples[k], t)
 	}
 	return r
+}
+
+func resolveNestedRelation(t map[string]any) map[string]any {
+	m := map[string]any{}
+	for k, v := range t {
+		switch x := v.(type) {
+		case []map[string]any:
+			s := make([]*Relation, len(x))
+			for i, x := range x {
+				s[i] = NewRelation().InsertTuple(x)
+			}
+			m[k] = s
+		case map[string]any:
+			m[k] = NewRelation().InsertTuple(x)
+		default:
+			m[k] = x
+		}
+	}
+	return m
 }
 
 func (r *Relation) InsertOne(pairs ...func() (string, any)) *Relation {
