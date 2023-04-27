@@ -1,0 +1,10 @@
+[
+    {
+        "name": "Jake",
+        "born": {"year": 1980}
+    },
+    {
+        "name": "Kristen",
+        "born": {"year": 1990}
+    }
+]
