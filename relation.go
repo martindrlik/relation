@@ -16,6 +16,14 @@ func NewRelation() *Relation {
 	}
 }
 
+// Len returns the number of stored tuples.
+func (r *Relation) Len() (n int) {
+	for _, r := range r.relations {
+		n += r.len()
+	}
+	return
+}
+
 // Equals returns true if compared relations are equal and
 // returns false otherwise.
 func (r *Relation) Equals(s *Relation) bool {

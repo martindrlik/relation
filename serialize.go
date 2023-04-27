@@ -11,7 +11,10 @@ func (r *Relation) Serialize(w io.Writer) *Relation {
 	sort.Strings(k)
 	a := keys(r.attributes())
 	sort.Strings(a)
-	must(fmt.Fprint(w, "["))
+	if r.Len() > 1 {
+		must(fmt.Fprint(w, "["))
+		defer func() { must(fmt.Fprint(w, "]")) }()
+	}
 	for _, k := range k {
 		r := r.relations[k]
 		tks := keys(r.tuples)
@@ -29,7 +32,6 @@ func (r *Relation) Serialize(w io.Writer) *Relation {
 			}
 		}
 	}
-	must(fmt.Fprint(w, "]"))
 	return r
 }
 
