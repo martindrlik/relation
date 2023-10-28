@@ -7,46 +7,52 @@ import (
 )
 
 func TestNaturalJoin(t *testing.T) {
-	employees := rex.NewRelation().
-		InsertMany(
-			employee("Harry", 3415, "Finance"),
-			employee("Sally", 2241, "Sales"),
-			employee("George", 3401, "Finance"),
-			employee("Harriet", 2202, "Sales"),
-			employee("Mary", 1257, "Human Resources"))
-	departments := rex.NewRelation().
-		InsertMany(
-			department("Finance", "George"),
-			department("Sales", "Harriet"),
-			department("Production", "Charles"))
-	expected := rex.NewRelation().
-		InsertMany(
-			join(employee("Harry", 3415, "Finance"), department("Finance", "George")),
-			join(employee("Sally", 2241, "Sales"), department("Sales", "Harriet")),
-			join(employee("George", 3401, "Finance"), department("Finance", "George")),
-			join(employee("Harriet", 2202, "Sales"), department("Sales", "Harriet")))
-	if !expected.Equals(employees.NaturalJoin(departments)) {
-		t.Error("expected equal after natural join")
-	}
-}
+	t.Run("cartesian product", func(t *testing.T) {
+		adventure := rex.NaturalJoin(
+			in(glue(finnName), glue(jakeName)),
+			in(glue(adventureRelease)))
+		for _, m := range []map[string]any{finn, jake} {
+			if !adventure.Contains(m) {
+				t.Errorf("expected %v to contain %v", adventure, m)
+			}
+		}
+		finn, jake := take2(adventure)
+		if !finn.isPossible {
+			t.Errorf("expected %v to be possible meaning not directly inserted", finn)
+		}
+		if !jake.isPossible {
+			t.Errorf("expected %v to be possible meaning not directly inserted", jake)
+		}
+	})
+	t.Run("department", func(t *testing.T) {
+		employee := func(name, department string) map[string]any {
+			return map[string]any{"name": name, "department": department}
+		}
+		department := func(name, manager string) map[string]any {
+			return map[string]any{"department": name, "manager": manager}
+		}
+		var (
+			harry   = employee("Harry", "Finance")
+			sally   = employee("Sally", "Sales")
+			george  = employee("George", "Finance")
+			harriet = employee("Harriet", "Sales")
 
-func employee(name string, id int, department string) []func() (string, any) {
-	return rex.One(
-		func() (string, any) { return "name", name },
-		func() (string, any) { return "empId", id },
-		func() (string, any) { return "deptName", department })
-}
-
-func department(name, manager string) []func() (string, any) {
-	return rex.One(
-		func() (string, any) { return "deptName", name },
-		func() (string, any) { return "manager", manager })
-}
-
-func join[T any](a ...[]T) []T {
-	r := []T{}
-	for _, a := range a {
-		r = append(r, a...)
-	}
-	return r
+			finance    = department("Finance", "George")
+			sales      = department("Sales", "Harriet")
+			production = department("Production", "Charles")
+		)
+		adventure := rex.NaturalJoin(
+			in(harry, sally, george, harriet),
+			in(finance, sales, production))
+		for _, m := range []map[string]any{
+			gluem(harry, finance),
+			gluem(sally, sales),
+			gluem(george, finance),
+			gluem(harriet, sales),
+		} {
+			if !adventure.Contains(m) {
+				t.Errorf("expected %v to contain %v", adventure, m)
+			}
+		}
+	})
 }

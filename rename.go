@@ -1,26 +1,20 @@
 package rex
 
-import "fmt"
-
+// Rename returns new relation with attributes renamed.
 func (r *Relation) Rename(rename map[string]string) *Relation {
-	s := NewRelation()
-	for _, r := range r.relations {
-		for _, t := range r.tuples {
-			for _, t := range t {
-				m := tuple{}
-				for k, v := range t {
-					if n, ok := rename[k]; ok {
-						if _, ok := t[n]; ok {
-							panic(fmt.Sprintf("illegal rename %v to %v", k, n))
-						}
-						m[n] = v
-					} else {
-						m[k] = v
-					}
-				}
-				s.InsertTuple(m)
+	nr := NewRelation()
+	for ak, ts := range *r {
+		as := ak.split()
+		nas := make(attrs, len(as))
+		for i, a := range as {
+			if na, ok := rename[a]; ok {
+				nas[i] = na
+			} else {
+				nas[i] = a
 			}
 		}
+		delete(*nr, ak)
+		(*nr)[nas.key()] = ts
 	}
-	return s
+	return nr
 }

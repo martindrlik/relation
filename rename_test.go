@@ -3,32 +3,13 @@ package rex_test
 import (
 	"testing"
 
-	"github.com/martindrlik/rex"
+	"golang.org/x/exp/maps"
 )
 
 func TestRename(t *testing.T) {
-	newYorkCity := city("New York")
-	newYorkName := name("New York")
-	r := rex.NewRelation().InsertOne(newYorkCity)
-	s := rex.NewRelation().InsertOne(newYorkName)
-	if !r.Equals(s.Rename(map[string]string{
-		attr(newYorkName): attr(newYorkCity),
-	})) {
-		t.Error("expected equal after rename")
+	actual := take1(in(map[string]any{"firstName": "Finn", "tvShow": "Adventure Time"}).Rename(map[string]string{"firstName": "name"})).m
+	expect := map[string]any{"name": "Finn", "tvShow": "Adventure Time"}
+	if !maps.Equal(actual, expect) {
+		t.Errorf("%v is not equal to %v", actual, expect)
 	}
-}
-
-func TestIllegalRename(t *testing.T) {
-	newYorkCity := city("New York")
-	r := rex.NewRelation().InsertOne(newYorkCity)
-	defer func() {
-		s := recover().(string)
-		expected := "illegal rename city to city"
-		if s != expected {
-			t.Errorf("expected %q got %q", expected, s)
-		}
-	}()
-	r.Rename(map[string]string{
-		attr(newYorkCity): attr(newYorkCity),
-	})
 }

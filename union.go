@@ -1,27 +1,13 @@
 package rex
 
-func (r *Relation) Union(s *Relation) *Relation {
-	t := NewRelation()
-	for k, r := range r.relations {
-		if s, ok := s.relations[k]; ok {
-			for _, v := range r.union(s) {
-				t.InsertTuple(v)
-			}
-		}
+// Union returns new relation with tuples from all relations.
+func Union(a ...*Relation) *Relation {
+	r := NewRelation()
+	for _, a := range a {
+		a.Each(func(m map[string]any, isPossible bool) bool {
+			r.Insert(m)
+			return true
+		})
 	}
-	return t
-}
-
-func (r *relation) union(s *relation) []tuple {
-	t := []tuple{}
-	add := func(tuples tuples) {
-		for _, v := range tuples {
-			for _, v := range v {
-				t = append(t, v.shallowCopy())
-			}
-		}
-	}
-	add(r.tuples)
-	add(s.tuples)
-	return t
+	return r
 }

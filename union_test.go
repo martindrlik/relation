@@ -4,23 +4,16 @@ import (
 	"testing"
 
 	"github.com/martindrlik/rex"
+	"golang.org/x/exp/maps"
 )
 
 func TestUnion(t *testing.T) {
-	r := rex.NewRelation().
-		InsertOne(name("Harry")).
-		InsertOne(name("Sally"))
-	s := rex.NewRelation().
-		InsertOne(name("George")).
-		InsertOne(name("Harriet")).
-		InsertOne(name("Mary"))
-	expected := rex.NewRelation().
-		InsertOne(name("Harry")).
-		InsertOne(name("Sally")).
-		InsertOne(name("George")).
-		InsertOne(name("Harriet")).
-		InsertOne(name("Mary"))
-	if !expected.Equals(r.Union(s)) {
-		t.Error("expected equal after union")
+	actual1st, actual2th := take2(rex.Union(in(finn), in(marceline)))
+	expect1st, expect2th := take2(in(finn, marceline))
+	if !maps.Equal(actual1st.m, expect1st.m) {
+		t.Errorf("first %v is not equal to %v", actual1st, expect1st)
+	}
+	if !maps.Equal(actual2th.m, expect2th.m) {
+		t.Errorf("second %v is not equal to %v", actual2th, expect2th)
 	}
 }

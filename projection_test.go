@@ -3,16 +3,24 @@ package rex_test
 import (
 	"testing"
 
-	"github.com/martindrlik/rex"
+	"golang.org/x/exp/maps"
 )
 
-func TestProject(t *testing.T) {
-	r := rex.NewRelation()
-	s := rex.NewRelation()
-	bornYear := bornYear(1980)
-	r.InsertOne(bornYear)
-	s.InsertOne(bornYear, name("Jake"))
-	if !r.Equals(s.Project(attr(bornYear))) {
-		t.Error("expected equal after projection")
-	}
+func TestProjection(t *testing.T) {
+	t.Run("simple", func(t *testing.T) {
+		actual := take1(in(finn).Projection(attr(finnName))).m
+		if expect := glue(finnName); !maps.Equal(actual, expect) {
+			t.Errorf("%v is not equal to %v", actual, expect)
+		}
+	})
+	t.Run("no attribute to project", func(t *testing.T) {
+		count := 0
+		in(glue(finnName)).Projection(attr(adventureRelease)).Each(func(m map[string]any, b bool) bool {
+			count++
+			return true
+		})
+		if count != 0 {
+			t.Errorf("expected count to be zero got %v", count)
+		}
+	})
 }

@@ -1,48 +1,54 @@
 package rex
 
 import (
-	"fmt"
 	"sort"
-	"strings"
+
+	"golang.org/x/exp/maps"
 )
 
 type (
-	tuple  map[string]any
-	tuples map[string][]tuple
+	tuplex struct {
+		tuple
+		meta
+	}
+
+	tuple []any
+
+	meta struct {
+		isPossible bool
+	}
+
+	tupleMap map[string]any
 )
 
-func (t tuple) shallowCopy() tuple {
-	v := map[string]any{}
-	for k, w := range t {
-		v[k] = w
+func (t tuple) equal(u tuple) bool {
+	for i, v := range t {
+		if v != u[i] {
+			return false
+		}
 	}
-	return v
+	return true
 }
 
-func (t tuple) key() (key string, isPartial bool) {
-	k := strings.Builder{}
-	a := keys(t)
-	sort.Strings(a)
-	for _, a := range a {
-		v := t[a]
-		if k.Len() > 0 {
-			k.WriteString("\f")
-		}
-		if r, ok := v.(*Relation); ok {
-			k.WriteString(r.key())
-			isPartial = true
+func (tm tupleMap) ktx() (attrsKey, tuplex) {
+	ks := maps.Keys(tm)
+	sort.Strings(ks)
+	t := make(tuple, len(ks))
+	for i, k := range ks {
+		v := tm[k]
+		if nested, ok := v.(map[string]any); ok {
+			t[i] = NewRelation().Insert(nested)
 		} else {
-			k.WriteString(fmt.Sprint(v))
+			t[i] = v
 		}
 	}
-	return k.String(), isPartial
+	return attrs(ks).key(), tuplex{t, meta{}}
 }
 
-func (t tuples) first() tuple {
-	for _, t := range t {
-		for _, t := range t {
-			return t
-		}
+func (t tuple) toMap(a attrs) map[string]any {
+	m := make(map[string]any)
+	for i, k := range a {
+		m[k] = t[i]
 	}
-	return tuple{}
+	return m
 }
