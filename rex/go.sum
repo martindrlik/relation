@@ -1,0 +1,6 @@
+github.com/martindrlik/rex v0.0.0-20231028211042-2ae809720580 h1:lqVUMDexFYojuNO09Wm4OMcGVrLcqSiyiCbuVw+0KIc=
+github.com/martindrlik/rex v0.0.0-20231028211042-2ae809720580/go.mod h1:4KdUFVq/KAGzx10QHDpiuwW45CuhVhJ1jEIIYoNcvn8=
+github.com/martindrlik/rex/rex/server v0.0.0-20231029232035-9cf3bd30a9f7 h1:QEEsiyAqGoyQXeI3iPu9SFQq6+W/cK/624PHzGJ5Fss=
+github.com/martindrlik/rex/rex/server v0.0.0-20231029232035-9cf3bd30a9f7/go.mod h1:iZeNV+2a60y2vJzxt2n9KbwbPgMEkO/X5+c5EUfw5EE=
+golang.org/x/exp v0.0.0-20231006140011-7918f672742d h1:jtJma62tbqLibJ5sFQz8bKtEM8rJBtfilJ2qTU199MI=
+golang.org/x/exp v0.0.0-20231006140011-7918f672742d/go.mod h1:ldy0pHrwJyGW56pPQzzkH36rKxoZW1tw7ZJpeKx+hdo=
