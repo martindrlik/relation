@@ -20,16 +20,24 @@ var state = &serverState{
 	rs: make(map[string]*rex.Relation),
 }
 
-func (s *serverState) Read(read func(*serverState)) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	read(s)
+func readState[R any](f func(*serverState) (R, error)) (R, error) {
+	state.mu.RLock()
+	defer state.mu.RUnlock()
+	return f(state)
 }
 
-func (s *serverState) Write(write func(*serverState)) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	write(s)
+func writeState[R any](f func(*serverState) (R, error)) (R, error) {
+	state.mu.Lock()
+	defer state.mu.Unlock()
+	return f(state)
+}
+
+func (s *serverState) r(name string) *rex.Relation {
+	r, ok := s.rs[name]
+	if ok {
+		return r
+	}
+	return rex.NewRelation()
 }
 
 func Listen(addr string) error {

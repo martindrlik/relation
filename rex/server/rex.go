@@ -15,35 +15,46 @@ type (
 	}
 
 	ListReply struct {
-		Tuples []map[string]any
+		Tuples []struct {
+			Map        map[string]any
+			IsPossible bool
+		}
 	}
 
 	Rex struct{}
 )
 
 func (*Rex) Insert(args *InsertArgs, reply *struct{}) error {
-	state.Write(func(s *serverState) {
+	_, err := writeState(func(s *serverState) (struct{}, error) {
 		r, ok := s.rs[args.Name]
 		if !ok {
 			r = rex.NewRelation()
 			s.rs[args.Name] = r
 		}
 		r.Insert(args.Tuple)
+		return struct{}{}, nil
 	})
-	return nil
+	return err
 }
 
 func (*Rex) List(args *ListArgs, reply *ListReply) error {
-	state.Read(func(s *serverState) {
+	_, err := readState(func(s *serverState) (struct{}, error) {
 		r, ok := s.rs[args.Name]
 		if !ok {
-			return
+			return struct{}{}, nil
 		}
-		reply.Tuples = []map[string]any{}
+		reply.Tuples = []struct {
+			Map        map[string]any
+			IsPossible bool
+		}{}
 		r.Each(func(m map[string]any, b bool) bool {
-			reply.Tuples = append(reply.Tuples, m)
+			reply.Tuples = append(reply.Tuples, struct {
+				Map        map[string]any
+				IsPossible bool
+			}{m, b})
 			return true
 		})
+		return struct{}{}, nil
 	})
-	return nil
+	return err
 }
