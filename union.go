@@ -4,9 +4,9 @@ package rex
 func Union(a ...*Relation) *Relation {
 	r := NewRelation()
 	for _, a := range a {
-		a.Each(func(m map[string]any, isPossible bool) bool {
+		a.Each(func(m map[string]any) error {
 			r.Insert(m)
-			return true
+			return nil
 		})
 	}
 	return r

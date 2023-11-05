@@ -12,11 +12,11 @@ func Example() {
 		map[string]any{"name": "Finn"},
 		map[string]any{"name": "Marceline"})
 	adventure := rex.NaturalJoin(shows, characters)
-	adventure.Each(func(tm map[string]any, isPossible bool) bool {
-		fmt.Println(isPossible, tm)
-		return true
+	adventure.Each(func(t map[string]any) error {
+		fmt.Println(t)
+		return nil
 	})
 	// Output:
-	// true map[name:Finn show:Adventure Time]
-	// true map[name:Marceline show:Adventure Time]
+	// map[name:Finn show:Adventure Time]
+	// map[name:Marceline show:Adventure Time]
 }

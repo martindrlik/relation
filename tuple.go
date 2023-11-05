@@ -1,54 +1,65 @@
 package rex
 
 import (
+	"reflect"
 	"sort"
-
-	"golang.org/x/exp/maps"
 )
 
-type (
-	tuplex struct {
-		tuple
-		meta
+type Tuple map[string]any
+
+type tuplex struct {
+	Tuple
+	metadata
+}
+
+type metadata struct {
+	isPossible bool
+}
+
+func (t Tuple) equal(u Tuple) bool {
+	if len(t) != len(u) {
+		return false
 	}
-
-	tuple []any
-
-	meta struct {
-		isPossible bool
-	}
-
-	tupleMap map[string]any
-)
-
-func (t tuple) equal(u tuple) bool {
-	for i, v := range t {
-		if v != u[i] {
+	for k, tv := range t {
+		uv, ok := u[k]
+		if !ok {
+			return false
+		}
+		if !equal(tv, uv) {
 			return false
 		}
 	}
 	return true
 }
 
-func (tm tupleMap) ktx() (attrsKey, tuplex) {
-	ks := maps.Keys(tm)
-	sort.Strings(ks)
-	t := make(tuple, len(ks))
-	for i, k := range ks {
-		v := tm[k]
-		if nested, ok := v.(map[string]any); ok {
-			t[i] = NewRelation().Insert(nested)
-		} else {
-			t[i] = v
-		}
+func equal(a, b any) bool {
+	if reflect.TypeOf(a) != reflect.TypeOf(b) {
+		return false
 	}
-	return attrs(ks).key(), tuplex{t, meta{}}
+	if _, ok := a.(*Relation); ok {
+		panic("not implemented")
+	}
+	if !reflect.DeepEqual(a, b) {
+		return false
+	}
+	return true
 }
 
-func (t tuple) toMap(a attrs) map[string]any {
-	m := make(map[string]any)
-	for i, k := range a {
-		m[k] = t[i]
+func (t Tuple) attrs() attrs {
+	a := make([]string, 0, len(t))
+	for k := range t {
+		a = append(a, k)
 	}
-	return m
+	sort.Strings(a)
+	return a
+}
+
+func (t Tuple) combine(u Tuple) Tuple {
+	r := make(Tuple)
+	for _, src := range []Tuple{t, u} {
+		for k, v := range src {
+			r[k] = v
+		}
+	}
+	return r
 }

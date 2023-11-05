@@ -1,20 +1,24 @@
 package rex
 
 // Rename returns new relation with attributes renamed.
-func (r *Relation) Rename(rename map[string]string) *Relation {
+func (r *Relation) Rename(m map[string]string) *Relation {
 	nr := NewRelation()
-	for ak, ts := range *r {
-		as := ak.split()
-		nas := make(attrs, len(as))
-		for i, a := range as {
-			if na, ok := rename[a]; ok {
-				nas[i] = na
-			} else {
-				nas[i] = a
-			}
+	for _, s := range r.relations {
+		for _, u := range s {
+			nr.Insert(u.Rename(m))
 		}
-		delete(*nr, ak)
-		(*nr)[nas.key()] = ts
 	}
 	return nr
+}
+
+func (t Tuple) Rename(m map[string]string) Tuple {
+	r := map[string]any{}
+	for k, v := range t {
+		if nk, ok := m[k]; ok {
+			r[nk] = v
+		} else {
+			r[k] = v
+		}
+	}
+	return r
 }

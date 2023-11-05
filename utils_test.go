@@ -1,12 +1,12 @@
 package rex_test
 
 import (
+	"errors"
 	"time"
 
 	"github.com/martindrlik/rex"
 )
 
-func show(show string) func() (string, any) { return pair("show", show) }
 func name(name string) func() (string, any) { return pair("name", name) }
 
 func born(year, month, day int) func() (string, any) {
@@ -28,47 +28,35 @@ func glue(a ...func() (string, any)) map[string]any {
 	return m
 }
 
-func gluem(a ...map[string]any) map[string]any {
-	m := map[string]any{}
-	for _, mm := range a {
-		for k, v := range mm {
-			m[k] = v
-		}
-	}
-	return m
-}
-
 func in(a ...map[string]any) *rex.Relation {
 	nr := rex.NewRelation()
 	return nr.Insert(a...)
 }
 
-func take2(r *rex.Relation) (tuplex, tuplex) {
+func take2(r *rex.Relation) (map[string]any, map[string]any) {
 	txs := take(r, 2)
 	return txs[0], txs[1]
 }
 
-func take1(r *rex.Relation) tuplex {
+func take1(r *rex.Relation) map[string]any {
 	txs := take(r, 1)
 	return txs[0]
 }
 
-func take(r *rex.Relation, n int) []tuplex {
-	txs := make([]tuplex, 0, n)
-	r.Each(func(m map[string]any, isPossible bool) bool {
-		txs = append(txs, tuplex{m, isPossible})
+func take(r *rex.Relation, n int) []map[string]any {
+	a := make([]map[string]any, 0)
+	r.Each(func(m map[string]any) error {
+		a = append(a, m)
 		n--
-		return n > 0
+		if n >= 0 {
+			return nil
+		}
+		return errors.New("no more tuples")
 	})
-	return txs
+	return a
 }
 
 func attr(fn func() (string, any)) string {
 	k, _ := fn()
 	return k
-}
-
-type tuplex struct {
-	m          map[string]any
-	isPossible bool
 }
