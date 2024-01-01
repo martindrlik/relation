@@ -1,65 +1,83 @@
 package rex
 
-import (
-	"reflect"
-	"sort"
-)
+import "reflect"
 
-type Tuple map[string]any
+// T represents a tuple.
+type T map[string]any
 
-type tuplex struct {
-	Tuple
-	metadata
+func (t T) IsEqual(other T) bool {
+	return len(t) == len(other) && t.isEqual(other)
 }
 
-type metadata struct {
-	isPossible bool
-}
-
-func (t Tuple) equal(u Tuple) bool {
-	if len(t) != len(u) {
-		return false
-	}
-	for k, tv := range t {
-		uv, ok := u[k]
-		if !ok {
-			return false
-		}
-		if !equal(tv, uv) {
+func (t T) isEqual(other T) bool {
+	for k, v := range t {
+		if !isEqual(v, other[k]) {
 			return false
 		}
 	}
 	return true
 }
 
-func equal(a, b any) bool {
-	if reflect.TypeOf(a) != reflect.TypeOf(b) {
-		return false
-	}
-	if _, ok := a.(*Relation); ok {
-		panic("not implemented")
-	}
-	if !reflect.DeepEqual(a, b) {
-		return false
-	}
-	return true
+func isEqual(a, b any) bool {
+	return reflect.DeepEqual(a, b)
 }
 
-func (t Tuple) attrs() attrs {
-	a := make([]string, 0, len(t))
+func (t T) IsCompatible(other T) bool {
+	return len(t) == len(other) && t.isCompatible(other)
+}
+
+func (t T) isCompatible(other T) bool {
 	for k := range t {
-		a = append(a, k)
-	}
-	sort.Strings(a)
-	return a
-}
-
-func (t Tuple) combine(u Tuple) Tuple {
-	r := make(Tuple)
-	for _, src := range []Tuple{t, u} {
-		for k, v := range src {
-			r[k] = v
+		if _, ok := other[k]; !ok {
+			return false
 		}
 	}
-	return r
+	return true
+}
+
+func (t T) HasAttributes(as ...string) bool {
+	for _, a := range as {
+		if _, ok := t[a]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
+func (t T) Project(as ...string) T {
+	nt := T{}
+	for _, a := range as {
+		nt[a] = t[a]
+	}
+	return nt
+}
+
+func (t T) CommonAttributes(other T) []string {
+	ca := []string{}
+	for k := range t {
+		if _, ok := other[k]; ok {
+			ca = append(ca, k)
+		}
+	}
+	return ca
+}
+
+func (t T) IsEqualOn(other T, on ...string) bool {
+	for _, k := range on {
+		if !isEqual(t[k], other[k]) {
+			return false
+		}
+	}
+	return true
+}
+
+func (t T) Join(other T) T {
+	nt := T{}
+	for k, v := range t {
+		nt[k] = v
+	}
+	for k, v := range other {
+		nt[k] = v
+	}
+	return nt
 }
