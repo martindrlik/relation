@@ -4,6 +4,19 @@ import "github.com/martindrlik/rex/schema"
 
 type R []T
 
+func (r *R) Schema() map[string]struct{} {
+	m := map[string]struct{}{}
+	for _, t := range *r {
+		for k := range t {
+			m[k] = struct{}{}
+		}
+		break
+	}
+	return m
+}
+
+func (r *R) IsEmpty() bool { return len(*r) == 0 }
+
 func (r *R) Equal(other *R) bool {
 	if len(*r) != len(*other) {
 		return false
@@ -33,8 +46,4 @@ func (r *R) Contain(t T) bool {
 		}
 	}
 	return false
-}
-
-func (r *R) IsEmpty() bool {
-	return len(*r) == 0
 }

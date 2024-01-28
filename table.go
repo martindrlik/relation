@@ -1,35 +1,45 @@
 package rex
 
 import (
-	"sort"
-
 	"github.com/martindrlik/rex/schema"
 )
 
 type Table struct {
-	schema    map[string]any
+	schema    map[string]struct{}
 	relations []*R
 }
 
-func NewTable(schema ...string) *Table {
-	return &Table{schema: schemaMap(schema)}
+func NewTable(schema ...string) *Table { return newTable(schema) }
+func newTable(s []string) *Table       { return &Table{schema: schema.Map(s...)} }
+
+func (tbl *Table) Schema() map[string]struct{}  { return tbl.schema }
+func (tbl *Table) Relations() []*R              { return tbl.relations }
+func (tbl *Table) Pick(schema ...string) *Table { return tbl.pick(schema) }
+
+func (tbl *Table) pick(s []string) *Table {
+	if len(s) == 0 {
+		return tbl
+	}
+	m := schema.Map(s...)
+	rs := []*R{}
+	for _, r := range tbl.relations {
+		if schema.IsEqual(r.Schema(), m) || schema.IsSubset(r.Schema(), m) {
+			rs = append(rs, r)
+		}
+	}
+	p := newTable(schema.Slice(relationsSchema(rs)))
+	p.relations = rs
+	return p
 }
 
-func schemaMap(schema []string) map[string]any {
-	m := make(map[string]any)
-	for _, a := range schema {
-		m[a] = struct{}{}
+func relationsSchema(rs []*R) map[string]struct{} {
+	m := map[string]struct{}{}
+	for _, r := range rs {
+		for k := range r.Schema() {
+			m[k] = struct{}{}
+		}
 	}
 	return m
-}
-
-func (tbl *Table) Schema() []string {
-	s := make([]string, 0, len(tbl.schema))
-	for k := range tbl.schema {
-		s = append(s, k)
-	}
-	sort.Strings(s)
-	return s
 }
 
 func (tbl *Table) Equal(other *Table) bool {
@@ -73,7 +83,7 @@ func Union(t1, t2 *Table) *Table {
 	if !schema.IsEqual(t1.schema, t2.schema) {
 		return &Table{}
 	}
-	tbl := NewTable(t1.Schema()...)
+	tbl := NewTable(schema.Slice(t1.Schema())...)
 	add := func(t T) { tbl.Add(t) }
 	t1.forEach(add)
 	t2.forEach(add)

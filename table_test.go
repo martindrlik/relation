@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/martindrlik/rex"
+	"github.com/martindrlik/rex/schema"
 )
 
 func TestTable(t *testing.T) {
@@ -34,7 +35,7 @@ func TestTable(t *testing.T) {
 
 	t.Run("Schema", func(t *testing.T) {
 		t1 := rex.NewTable("name", "age")
-		if !slices.Equal(t1.Schema(), []string{"age", "name"}) {
+		if !slices.Equal(schema.Slice(t1.Schema()), []string{"age", "name"}) {
 			t.Errorf("t1 schema is expected to be %v got %v", []string{"age", "name"}, t1.Schema())
 		}
 	})
