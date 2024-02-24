@@ -13,11 +13,11 @@ func ExampleUnion() {
 	t3 := rex.Union(t1, t2)
 	fmt.Println(rex.BoxTable([]string{"name", "age"}, t3.Relations()))
 	// Output:
-	// ┏━━━━━┯━━━━━━┓
-	// ┃ age │ name ┃
-	// ┠─────┼──────┨
-	// ┃ 42  │ John ┃
-	// ┃ *   │ Jake ┃
-	// ┗━━━━━┷━━━━━━┛
+	// ┏━━━━━━┯━━━━━┓
+	// ┃ name │ age ┃
+	// ┠──────┼─────┨
+	// ┃ John │ 42  ┃
+	// ┃ Jake │ *   ┃
+	// ┗━━━━━━┷━━━━━┛
 
 }
