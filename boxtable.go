@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"io"
 	"strings"
-
-	"github.com/martindrlik/rex/schema"
 )
 
 type boxTable struct {
@@ -14,13 +12,13 @@ type boxTable struct {
 	max    map[string]int
 }
 
-func BoxTable[T any](schema map[string]T, relations []*R) interface{ String() string } {
+func BoxTable(schema []string, relations []*R) interface{ String() string } {
 	return makeBoxTable(schema, relations)
 }
 
-func makeBoxTable[T any](s map[string]T, rs []*R) interface{ String() string } {
+func makeBoxTable(s []string, rs []*R) interface{ String() string } {
 	bt := &boxTable{
-		schema: schema.Slice(s),
+		schema: s,
 		rows:   []map[string]string{},
 		max:    map[string]int{},
 	}
@@ -50,22 +48,31 @@ func (bt *boxTable) addRow(t T) {
 
 func (bt *boxTable) String() string {
 	sb := &strings.Builder{}
+	bt.writeTop(sb)
 	bt.writeHeader(sb)
-	bt.writeRows(sb)
+	if len(bt.rows) > 0 {
+		bt.writeSeparator(sb)
+		bt.writeRows(sb)
+	}
+	bt.writeBottom(sb)
 	return sb.String()
 }
 
-func (bt *boxTable) writeHeader(w io.Writer) {
+func (bt *boxTable) writeTop(w io.Writer) {
 	// ┏━━━━━━┯━━━━━━┓
 	bt.writeRow(w, "┏", "┯", "┓", bt.schema, func(s string) string {
 		return strings.Repeat("━", bt.max[s]+2)
 	})
+}
 
+func (bt *boxTable) writeHeader(w io.Writer) {
 	// ┃    x │    y ┃
 	bt.writeRow(w, "┃", "│", "┃", bt.schema, func(s string) string {
 		return fmt.Sprintf(" %s ", bt.pad(s, s))
 	})
+}
 
+func (bt *boxTable) writeSeparator(w io.Writer) {
 	// ┠──────┼──────┨
 	bt.writeRow(w, "┠", "┼", "┨", bt.schema, func(s string) string {
 		return strings.Repeat("─", bt.max[s]+2)
@@ -80,6 +87,9 @@ func (bt *boxTable) writeRows(w io.Writer) {
 			return fmt.Sprintf(" %s ", bt.pad(s, val(v, ok)))
 		})
 	}
+}
+
+func (bt *boxTable) writeBottom(w io.Writer) {
 	// ┗━━━━━━┷━━━━━━┛
 	bt.writeRow(w, "┗", "┷", "┛", bt.schema, func(s string) string {
 		return strings.Repeat("━", bt.max[s]+2)

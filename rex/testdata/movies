@@ -1,0 +1,5 @@
+{"schema": ["title", "year", "director"], "rows": [
+    {"title": "Guardians of the Galaxy Vol. 3", "year": 2023, "director": "James Gunn"},
+    {"title": "The Avengers", "year": 2012, "director": "Joss Whedon"},
+    {"title": "Thor: Love and Thunder", "year": 2022, "director": "Taika Waititi"}
+]}
