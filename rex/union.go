@@ -8,7 +8,7 @@ import (
 
 func (state *state) unionCmd(a args) {
 	if len(a) < 3 {
-		fmt.Println("usage: union table1 table2 newtable")
+		fmt.Println("usage: u table1 table2 newtable")
 		return
 	}
 	findTable := func(name string) *rex.Table {
@@ -23,6 +23,9 @@ func (state *state) unionCmd(a args) {
 	if t1 == nil || t2 == nil {
 		return
 	}
-	t3 := rex.Union(t1, t2)
-	state.tables[a[2]] = t3
+	u, err := rex.Union(t1, t2)
+	if err != nil {
+		fmt.Printf("union failed: %v\n", err)
+	}
+	state.tables[a[2]] = u
 }

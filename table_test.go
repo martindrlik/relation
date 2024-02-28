@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/martindrlik/rex"
-	"github.com/martindrlik/rex/schema"
 )
 
 func TestTable(t *testing.T) {
@@ -33,10 +32,10 @@ func TestTable(t *testing.T) {
 		}
 	})
 
-	t.Run("Schema", func(t *testing.T) {
+	t.Run("SchemaInOrder", func(t *testing.T) {
 		t1 := rex.NewTable("name", "age")
-		if !slices.Equal(schema.Slice(t1.Schema()), []string{"age", "name"}) {
-			t.Errorf("t1 schema is expected to be %v got %v", []string{"age", "name"}, t1.Schema())
+		if !slices.Equal(t1.SchemaInOrder(), []string{"name", "age"}) {
+			t.Errorf("t1 schema is expected to be %v got %v", []string{"name", "age"}, t1.Schema())
 		}
 	})
 
@@ -44,7 +43,7 @@ func TestTable(t *testing.T) {
 		u1 := rex.NewTable("name", "age").Add(rex.T{"name": "John", "age": 42})
 		u2 := rex.NewTable("name", "age").Add(rex.T{"name": "Jake"})
 		expect := rex.NewTable("name", "age").Add(rex.T{"name": "John", "age": 42}).Add(rex.T{"name": "Jake"})
-		actual := rex.Union(u1, u2)
+		actual := must(rex.Union(u1, u2))
 		if !actual.Equal(expect) {
 			t.Error("u1 union u2 should be equal to u12")
 		}

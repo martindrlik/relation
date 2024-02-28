@@ -7,11 +7,11 @@ import (
 )
 
 func TestRelation(t *testing.T) {
-	r1 := (&rex.R{}).Add(rex.T{"name": "John", "age": 42})
-	r2 := (&rex.R{}).Add(rex.T{"name": "John", "age": 42})
-	r3 := (&rex.R{}).Add(rex.T{"name": "Jake", "age": 34})
-	r4 := (&rex.R{}).Add(rex.T{"name": "John", "age": 42, "city": "London"})
-	r5 := (&rex.R{}).Add(rex.T{"name": "John", "age": 42}).Add(rex.T{"name": "Jake", "age": 34})
+	r1 := must((&rex.R{}).Add(rex.T{"name": "John", "age": 42}))
+	r2 := must((&rex.R{}).Add(rex.T{"name": "John", "age": 42}))
+	r3 := must((&rex.R{}).Add(rex.T{"name": "Jake", "age": 34}))
+	r4 := must((&rex.R{}).Add(rex.T{"name": "John", "age": 42, "city": "London"}))
+	r5 := must(must((&rex.R{}).Add(rex.T{"name": "John", "age": 42})).Add(rex.T{"name": "Jake", "age": 34}))
 	t.Run("Equal", func(t *testing.T) {
 		if !r1.Equal(r2) {
 			t.Error("r1 and r2 should be equal")

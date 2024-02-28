@@ -1,9 +1,5 @@
 package rex
 
-import (
-	"github.com/martindrlik/rex/schema"
-)
-
 type Table struct {
 	schema    []string
 	relations []*R
@@ -12,25 +8,26 @@ type Table struct {
 func NewTable(schema ...string) *Table { return newTable(schema) }
 func newTable(s []string) *Table       { return &Table{schema: s} }
 
-func (tbl *Table) SchemaInOrder() []string      { return tbl.schema }
-func (tbl *Table) Schema() map[string]struct{}  { return schema.Map(tbl.schema...) }
-func (tbl *Table) Relations() []*R              { return tbl.relations }
-func (tbl *Table) Pick(schema ...string) *Table { return tbl.pick(schema) }
+func (tbl *Table) SchemaInOrder() []string            { return tbl.schema }
+func (tbl *Table) Schema() Schema                     { return newSchema(tbl.schema...) }
+func (tbl *Table) Relations() []*R                    { return tbl.relations }
+func (tbl *Table) Projection(schema ...string) *Table { return tbl.projection(schema) }
 
-func (tbl *Table) pick(s []string) *Table {
-	if len(s) == 0 {
+func (tbl *Table) projection(schema []string) *Table {
+	if len(schema) == 0 {
 		return tbl
 	}
-	m := schema.Map(s...)
+	p := newSchema(schema...)
 	rs := []*R{}
 	for _, r := range tbl.relations {
-		if schema.IsEqual(r.Schema(), m) || schema.IsSubset(r.Schema(), m) {
+		if r.Schema().IsEqual(p) || r.Schema().IsSubset(p) {
 			rs = append(rs, r)
 		}
 	}
-	p := newTable(schema.Slice(relationsSchema(rs)))
-	p.relations = rs
-	return p
+
+	nt := newTable(schema)
+	nt.relations = rs
+	return nt
 }
 
 func relationsSchema(rs []*R) map[string]struct{} {
@@ -45,7 +42,7 @@ func relationsSchema(rs []*R) map[string]struct{} {
 
 func (tbl *Table) Equal(other *Table) bool {
 	if len(tbl.relations) != len(other.relations) ||
-		!schema.IsEqual(tbl.Schema(), other.Schema()) {
+		!tbl.Schema().IsEqual(other.Schema()) {
 		return false
 	}
 	for i, r := range tbl.relations {
@@ -57,8 +54,8 @@ func (tbl *Table) Equal(other *Table) bool {
 }
 
 func (tbl *Table) Add(t T) *Table {
-	isCompatible := schema.IsEqual(t, tbl.Schema()) || schema.IsSubset(t, tbl.Schema())
-	if !isCompatible {
+	if !(t.Schema().IsEqual(tbl.Schema()) ||
+		t.Schema().IsSubset(tbl.Schema())) {
 		panic("schema mismatch")
 	}
 
@@ -73,7 +70,7 @@ func (tbl *Table) Add(t T) *Table {
 
 func (tbl *Table) tryFindCompatible(t T) *R {
 	for _, r := range tbl.relations {
-		if schema.IsEqual(t, (*r)[0]) {
+		if t.Schema().IsEqual((*r)[0].Schema()) {
 			return r
 		}
 	}

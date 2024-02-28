@@ -1,18 +1,12 @@
 package rex
 
-import "github.com/martindrlik/rex/schema"
-
 type R []T
 
-func (r *R) Schema() map[string]struct{} {
-	m := map[string]struct{}{}
+func (r *R) Schema() Schema {
 	for _, t := range *r {
-		for k := range t {
-			m[k] = struct{}{}
-		}
-		break
+		return newSchemaTuple(t)
 	}
-	return m
+	return newSchema()
 }
 
 func (r *R) IsEmpty() bool { return len(*r) == 0 }
@@ -29,14 +23,14 @@ func (r *R) Equal(other *R) bool {
 	return true
 }
 
-func (r *R) Add(t T) *R {
-	if !r.IsEmpty() && !schema.IsEqual(t, (*r)[0]) {
-		panic("schema mismatch")
+func (r *R) Add(t T) (*R, error) {
+	if !r.IsEmpty() && !t.Schema().IsEqual((*r)[0].Schema()) {
+		return nil, ErrSchemaMismatch
 	}
 	if !r.Contain(t) {
 		*r = append(*r, t)
 	}
-	return r
+	return r, nil
 }
 
 func (r *R) Contain(t T) bool {

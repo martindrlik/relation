@@ -14,7 +14,7 @@ func ExampleBoxTable() {
 
 	fmt.Println(rex.BoxTable(t1.SchemaInOrder(), t1.Relations()))
 
-	t2 := t1.Pick("title")
+	t2 := t1.Projection("title")
 	fmt.Println(rex.BoxTable(t2.SchemaInOrder(), t2.Relations()))
 
 	empty := rex.NewTable("title", "year")
