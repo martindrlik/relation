@@ -1,4 +1,4 @@
-package rex_test
+package table_test
 
 import (
 	"slices"
@@ -34,8 +34,8 @@ func TestTable(t *testing.T) {
 
 	t.Run("SchemaInOrder", func(t *testing.T) {
 		t1 := rex.NewTable("name", "age")
-		if !slices.Equal(t1.SchemaInOrder(), []string{"name", "age"}) {
-			t.Errorf("t1 schema is expected to be %v got %v", []string{"name", "age"}, t1.Schema())
+		if !slices.Equal(t1.Schema(), []string{"name", "age"}) {
+			t.Errorf("t1 schema is expected to be %v got %v", []string{"name", "age"}, t1.SchemaSet())
 		}
 	})
 

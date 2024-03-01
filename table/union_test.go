@@ -1,4 +1,4 @@
-package rex_test
+package table_test
 
 import (
 	"fmt"

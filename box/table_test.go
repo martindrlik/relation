@@ -1,24 +1,31 @@
-package rex_test
+package box_test
 
 import (
 	"fmt"
 
-	"github.com/martindrlik/rex"
+	"github.com/martindrlik/rex/box"
+	"github.com/martindrlik/rex/table"
+	"github.com/martindrlik/rex/tuple"
 )
 
-func ExampleBoxTable() {
+func ExampleTable() {
+	require := func(err error) {
+		if err != nil {
+			panic(err)
+		}
+	}
 
-	t1 := rex.NewTable("title", "year").
-		Add(rex.T{"title": "Adventure Time"}).
-		Add(rex.T{"title": "What We Do in the Shadows", "year": 2019})
+	t := table.NewTable("title", "year")
+	require(t.Append(tuple.Tuple{"title": "Adventure Time"}))
+	require(t.Append(tuple.Tuple{"title": "What We Do in the Shadows", "year": 2019}))
 
-	fmt.Println(rex.BoxTable(t1.SchemaInOrder(), t1.Relations()))
+	fmt.Println(box.Table(t.Schema().Attributes(), t.Relations()))
 
-	t2 := t1.Projection("title")
-	fmt.Println(rex.BoxTable(t2.SchemaInOrder(), t2.Relations()))
+	v := t.Project("title")
+	fmt.Println(box.Table(v.Schema().Attributes(), v.Relations()))
 
-	empty := rex.NewTable("title", "year")
-	fmt.Println(rex.BoxTable(empty.SchemaInOrder(), empty.Relations()))
+	empty := table.NewTable("title", "year")
+	fmt.Println(box.Table(empty.Schema().Attributes(), empty.Relations()))
 
 	// Output:
 	// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┯━━━━━━┓

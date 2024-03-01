@@ -23,7 +23,7 @@ func (state *state) tableCmd(a args) {
 }
 
 func printTable(table *rex.Table) {
-	fmt.Print(rex.BoxTable(table.SchemaInOrder(), table.Relations()))
+	fmt.Print(rex.BoxTable(table.Schema(), table.Relations()))
 }
 
 func (state *state) tablePrint(name string) {
