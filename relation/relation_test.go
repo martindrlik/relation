@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/martindrlik/rex/relation"
+	"github.com/martindrlik/rex/require"
 	"github.com/martindrlik/rex/schema"
 	"github.com/martindrlik/rex/tuple"
 )
@@ -11,7 +12,7 @@ import (
 func TestRelation(t *testing.T) {
 
 	t.Run("Relation", func(t *testing.T) {
-		r := must(relation.NewRelation(tuple.Tuple{"name": "John", "age": 42}))
+		r := require.Must(relation.NewRelation(tuple.Tuple{"name": "John", "age": 42}))
 		if !r.Schema().IsEqual(schema.NewSchema("name", "age")) {
 			t.Error("r should have schema name and age")
 		}
@@ -21,11 +22,11 @@ func TestRelation(t *testing.T) {
 	})
 
 	t.Run("Equals", func(t *testing.T) {
-		r1 := must(relation.NewRelation(tuple.Tuple{"name": "John", "age": 42}))
-		r2 := must(relation.NewRelation(tuple.Tuple{"name": "John", "age": 42}))
-		r3 := must(relation.NewRelation(tuple.Tuple{"name": "Jake", "age": 34}))
-		r4 := must(relation.NewRelation(tuple.Tuple{"name": "John", "age": 42, "city": "London"}))
-		r5 := must(relation.NewRelation(
+		r1 := require.Must(relation.NewRelation(tuple.Tuple{"name": "John", "age": 42}))
+		r2 := require.Must(relation.NewRelation(tuple.Tuple{"name": "John", "age": 42}))
+		r3 := require.Must(relation.NewRelation(tuple.Tuple{"name": "Jake", "age": 34}))
+		r4 := require.Must(relation.NewRelation(tuple.Tuple{"name": "John", "age": 42, "city": "London"}))
+		r5 := require.Must(relation.NewRelation(
 			tuple.Tuple{"name": "John", "age": 42},
 			tuple.Tuple{"name": "Jake", "age": 34}))
 		if !r1.Equals(r2) {
@@ -46,7 +47,7 @@ func TestRelation(t *testing.T) {
 		u := tuple.Tuple{"name": "John", "age": 42}
 		v := tuple.Tuple{"name": "Jake", "age": 34}
 		w := tuple.Tuple{"city": "London"}
-		r := must(relation.NewRelation(u, v))
+		r := require.Must(relation.NewRelation(u, v))
 		if !r.Contains(u) {
 			t.Error("r should contain u")
 		}
@@ -59,7 +60,7 @@ func TestRelation(t *testing.T) {
 		u := tuple.Tuple{"name": "John", "age": 42}
 		v := tuple.Tuple{"name": "Jake", "age": 34}
 		w := tuple.Tuple{"city": "London"}
-		r := must(relation.NewRelation(u))
+		r := require.Must(relation.NewRelation(u))
 		if err := r.Append(v); err != nil {
 			t.Error("r should append v")
 		}
@@ -73,38 +74,31 @@ func TestRelation(t *testing.T) {
 	})
 
 	t.Run("Project", func(t *testing.T) {
-		r := must(relation.NewRelation(
+		r := require.Must(relation.NewRelation(
 			tuple.Tuple{"name": "John", "age": 42},
 			tuple.Tuple{"name": "John", "age": 34}))
-		actual := must(r.Project("name"))
-		expect := must(relation.NewRelation(tuple.Tuple{"name": "John"}))
+		actual := require.Must(r.Project("name"))
+		expect := require.Must(relation.NewRelation(tuple.Tuple{"name": "John"}))
 		if !actual.Equals(expect) {
 			t.Errorf("expected %v got %v", expect, actual)
 		}
 	})
 
 	t.Run("Union", func(t *testing.T) {
-		r := must(relation.NewRelation(tuple.Tuple{"name": "John", "age": 42}))
-		s := must(relation.NewRelation(tuple.Tuple{"name": "Jake", "age": 34}))
-		actual := must(r.Union(s))
-		expect := must(relation.NewRelation(
+		r := require.Must(relation.NewRelation(tuple.Tuple{"name": "John", "age": 42}))
+		s := require.Must(relation.NewRelation(tuple.Tuple{"name": "Jake", "age": 34}))
+		actual := require.Must(r.Union(s))
+		expect := require.Must(relation.NewRelation(
 			tuple.Tuple{"name": "John", "age": 42},
 			tuple.Tuple{"name": "Jake", "age": 34}))
 		if !actual.Equals(expect) {
 			t.Errorf("expected %v got %v", expect, actual)
 		}
 
-		u := must(relation.NewRelation(tuple.Tuple{"name": "John"}))
+		u := require.Must(relation.NewRelation(tuple.Tuple{"name": "John"}))
 		if _, err := r.Union(u); err != relation.ErrSchemaMismatch {
 			t.Error("r union u should not be possible due to schema mismatch")
 		}
 	})
 
-}
-
-func must[T any](x T, err error) T {
-	if err != nil {
-		panic(err)
-	}
-	return x
 }

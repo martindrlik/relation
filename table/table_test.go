@@ -40,7 +40,7 @@ func TestTable(t *testing.T) {
 	// 	u1 := rex.NewTable("name", "age").Append(tuple.Tuple{"name": "John", "age": 42})
 	// 	u2 := rex.NewTable("name", "age").Append(tuple.Tuple{"name": "Jake"})
 	// 	expect := rex.NewTable("name", "age").Append(tuple.Tuple{"name": "John", "age": 42}).Append(tuple.Tuple{"name": "Jake"})
-	// 	actual := must(rex.Union(u1, u2))
+	// 	actual := require.Must(rex.Union(u1, u2))
 	// 	if !actual.Equal(expect) {
 	// 		t.Error("u1 union u2 should be equal to u12")
 	// 	}

@@ -1,5 +1,7 @@
 package relation
 
+import "github.com/martindrlik/rex/require"
+
 func (r *Relation) Union(others ...*Relation) (*Relation, error) {
 	for _, o := range others {
 		if !r.Schema().IsEqual(o.Schema()) {
@@ -7,7 +9,7 @@ func (r *Relation) Union(others ...*Relation) (*Relation, error) {
 		}
 	}
 
-	x := must(r.Project(r.Schema().Attributes()...))
+	x := require.Must(r.Project(r.Schema().Attributes()...))
 
 	for _, o := range others {
 		x.appendRelation(o)
