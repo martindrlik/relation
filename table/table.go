@@ -52,24 +52,30 @@ func (t *Table) relationBySchema(s schema.Schema) *relation.Relation {
 	return nil
 }
 
-func (t *Table) Contains(v tuple.Tuple) bool {
-	s := schema.NewSchema(maps.Keys(v)...)
+func (t *Table) Contains(u tuple.Tuple) bool {
+	s := schema.NewSchema(maps.Keys(u)...)
 	r := t.relationBySchema(s)
 	if r == nil {
 		return false
 	}
-	return r.Contains(v)
+	return r.Contains(u)
 }
 
-func (t *Table) Append(u tuple.Tuple) error {
-	if !(u.Schema().IsEqual(t.Schema()) || u.Schema().IsSubset(t.Schema())) {
-		return relation.ErrSchemaMismatch
+func (t *Table) Append(u tuple.Tuple, tuples ...tuple.Tuple) error {
+	tuples = append([]tuple.Tuple{u}, tuples...)
+	for _, u := range tuples {
+		if !(u.Schema().IsEqual(t.Schema()) ||
+			u.Schema().IsSubset(t.Schema())) {
+			return relation.ErrSchemaMismatch
+		}
 	}
-	r := t.relationBySchema(u.Schema())
-	if r != nil {
-		return r.Append(u)
+	for _, u := range tuples {
+		r := t.relationBySchema(u.Schema())
+		if r != nil {
+			return r.Append(u)
+		}
+		r = require.Must(relation.NewRelation(u))
+		t.r = append(t.r, r)
 	}
-	r = require.Must(relation.NewRelation(u))
-	t.r = append(t.r, r)
 	return nil
 }

@@ -7,18 +7,10 @@ import (
 	"os"
 	"path"
 
-	"github.com/martindrlik/rex"
+	"github.com/martindrlik/rex/table"
 )
 
-func (state *state) loadCmd(a args) {
-	switch len(a) {
-	case 0:
-	default:
-		state.loadFile(a.first())
-	}
-}
-
-func (state *state) loadFile(name string) {
+func (rex *rex) loadFile(name string) {
 	f, err := os.Open(name)
 	if err != nil {
 		fmt.Println(err)
@@ -26,10 +18,10 @@ func (state *state) loadFile(name string) {
 	}
 	defer f.Close()
 
-	state.loadReader(path.Base(name), f)
+	rex.loadReader(path.Base(name), f)
 }
 
-func (state *state) loadReader(name string, r io.Reader) {
+func (rex *rex) loadReader(name string, r io.Reader) {
 	dec := json.NewDecoder(r)
 	for {
 		m, err := tryDecode[map[string]any](dec)
@@ -37,7 +29,7 @@ func (state *state) loadReader(name string, r io.Reader) {
 			fmt.Printf("failed to decode: %v\n", err)
 		}
 
-		state.loadTable(name, m)
+		rex.loadTable(name, m)
 
 		if err != nil {
 			break
@@ -52,7 +44,7 @@ func tryDecode[T any](dec *json.Decoder) (t T, err error) {
 	return t, nil
 }
 
-func (state *state) loadTable(name string, m map[string]any) {
+func (rex *rex) loadTable(name string, m map[string]any) {
 	if len(m) == 0 {
 		return
 	}
@@ -66,13 +58,19 @@ func (state *state) loadTable(name string, m map[string]any) {
 		fmt.Printf("failed to load table %s: rows not found\n", name)
 		return
 	}
-	table := rex.NewTable(fmap(s, func(a any) string {
-		return a.(string)
-	})...)
-	for _, row := range rows {
-		table.Add(row.(map[string]any))
+	x, err := table.NewTable(fmap(s, func(a any) string { return a.(string) })...)
+	if err != nil {
+		fmt.Printf("failed to load table %s: %v\n", name, err)
+		return
 	}
-	state.tables[name] = table
+	for _, row := range rows {
+		err := x.Append(row.(map[string]any))
+		if err != nil {
+			fmt.Printf("failed to append tuple to table %s: %v\n", name, err)
+			return
+		}
+	}
+	rex.ts[name] = x
 }
 
 func fmap[T any](s []any, f func(any) T) []T {

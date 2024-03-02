@@ -59,21 +59,21 @@ func (t *table) String() string {
 
 func (t *table) writeTop(w io.Writer) {
 	// ┏━━━━━━┯━━━━━━┓
-	t.writeRow(w, "┏", "┯", "┓", t.schema, func(s string) string {
+	t.writeRow(w, "┏", "┯", "┓", func(s string) string {
 		return strings.Repeat("━", t.max[s]+2)
 	})
 }
 
 func (t *table) writeHeader(w io.Writer) {
 	// ┃    x │    y ┃
-	t.writeRow(w, "┃", "│", "┃", t.schema, func(s string) string {
+	t.writeRow(w, "┃", "│", "┃", func(s string) string {
 		return fmt.Sprintf(" %s ", t.pad(s, s))
 	})
 }
 
 func (t *table) writeSeparator(w io.Writer) {
 	// ┠──────┼──────┨
-	t.writeRow(w, "┠", "┼", "┨", t.schema, func(s string) string {
+	t.writeRow(w, "┠", "┼", "┨", func(s string) string {
 		return strings.Repeat("─", t.max[s]+2)
 	})
 }
@@ -81,7 +81,7 @@ func (t *table) writeSeparator(w io.Writer) {
 func (t *table) writeRows(w io.Writer) {
 	for _, row := range t.rows {
 		// ┃ 2023 │ 2024 ┃
-		t.writeRow(w, "┃", "│", "┃", t.schema, func(s string) string {
+		t.writeRow(w, "┃", "│", "┃", func(s string) string {
 			v, ok := row[s]
 			return fmt.Sprintf(" %s ", t.pad(s, val(v, ok)))
 		})
@@ -90,7 +90,7 @@ func (t *table) writeRows(w io.Writer) {
 
 func (t *table) writeBottom(w io.Writer) {
 	// ┗━━━━━━┷━━━━━━┛
-	t.writeRow(w, "┗", "┷", "┛", t.schema, func(s string) string {
+	t.writeRow(w, "┗", "┷", "┛", func(s string) string {
 		return strings.Repeat("━", t.max[s]+2)
 	})
 }
@@ -102,7 +102,7 @@ func val(v string, ok bool) string {
 	return "*"
 }
 
-func (t *table) writeRow(w io.Writer, left, middle, right string, schema []string, valueFunc func(string) string) {
+func (t *table) writeRow(w io.Writer, left, middle, right string, valueFunc func(string) string) {
 	fmt.Fprint(w, left)
 	for i, s := range t.schema {
 		if i > 0 {

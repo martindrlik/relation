@@ -56,11 +56,16 @@ func (r *Relation) Contains(u tuple.Tuple) bool {
 	return false
 }
 
-func (r *Relation) Append(u tuple.Tuple) error {
-	if !r.Schema().IsEqual(u.Schema()) {
-		return ErrSchemaMismatch
+func (r *Relation) Append(u tuple.Tuple, tuples ...tuple.Tuple) error {
+	tuples = append([]tuple.Tuple{u}, tuples...)
+	for _, u := range tuples {
+		if !r.Schema().IsEqual(u.Schema()) {
+			return ErrSchemaMismatch
+		}
 	}
-	r.append(u)
+	for _, u := range tuples {
+		r.append(u)
+	}
 	return nil
 }
 
