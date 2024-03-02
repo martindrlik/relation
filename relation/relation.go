@@ -11,17 +11,22 @@ type Relation struct {
 	t []tuple.Tuple
 }
 
-func NewRelation(t tuple.Tuple, ts ...tuple.Tuple) (*Relation, error) {
-	r := &Relation{
+func NewRelation(t tuple.Tuple, others ...tuple.Tuple) (*Relation, error) {
+	if len(t) == 0 {
+		return nil, ErrMissingSchema
+	}
+
+	x := &Relation{
 		s: schema.NewSchema(maps.Keys(t)...),
 		t: []tuple.Tuple{t},
 	}
-	for _, t := range ts {
-		if err := r.Append(t); err != nil {
-			return nil, err
+	for _, o := range others {
+		if !x.Schema().IsEqual(o.Schema()) {
+			return nil, ErrSchemaMismatch
 		}
+		x.append(o)
 	}
-	return r, nil
+	return x, nil
 }
 
 func (r *Relation) Schema() schema.Schema { return r.s }
@@ -42,8 +47,8 @@ func (r *Relation) Equals(other *Relation) bool {
 	return true
 }
 
-func (r *Relation) Contains(v tuple.Tuple) bool {
-	for _, u := range r.t {
+func (r *Relation) Contains(u tuple.Tuple) bool {
+	for _, v := range r.t {
 		if u.Equals(v) {
 			return true
 		}
@@ -51,12 +56,26 @@ func (r *Relation) Contains(v tuple.Tuple) bool {
 	return false
 }
 
-func (r *Relation) Append(t tuple.Tuple) error {
-	if !r.s.IsEqual(schema.NewSchema(maps.Keys(t)...)) {
+func (r *Relation) Append(u tuple.Tuple) error {
+	if !r.Schema().IsEqual(u.Schema()) {
 		return ErrSchemaMismatch
 	}
+	r.append(u)
+	return nil
+}
+
+func (r *Relation) appendRelation(s *Relation) error {
+	if !r.Schema().IsEqual(s.Schema()) {
+		return ErrSchemaMismatch
+	}
+	for _, t := range s.t {
+		r.append(t)
+	}
+	return nil
+}
+
+func (r *Relation) append(t tuple.Tuple) {
 	if !r.Contains(t) {
 		r.t = append(r.t, t)
 	}
-	return nil
 }

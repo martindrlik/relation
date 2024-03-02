@@ -3,6 +3,7 @@ package table
 import (
 	"github.com/martindrlik/rex/maps"
 	"github.com/martindrlik/rex/relation"
+	"github.com/martindrlik/rex/require"
 	"github.com/martindrlik/rex/schema"
 	"github.com/martindrlik/rex/tuple"
 )
@@ -12,8 +13,12 @@ type Table struct {
 	r []*relation.Relation
 }
 
-func NewTable(attributes ...string) *Table {
-	return &Table{s: schema.NewSchema(attributes...)}
+func NewTable(attributes ...string) (*Table, error) {
+	if len(attributes) == 0 {
+		return nil, relation.ErrMissingSchema
+	}
+	x := &Table{s: schema.NewSchema(attributes...)}
+	return x, nil
 }
 
 func (t *Table) Schema() schema.Schema           { return t.s }
@@ -57,18 +62,14 @@ func (t *Table) Contains(v tuple.Tuple) bool {
 }
 
 func (t *Table) Append(u tuple.Tuple) error {
-	s := schema.NewSchema(maps.Keys(u)...)
-	if !t.Schema().IsEqual(s) && !t.Schema().IsSubset(s) {
+	if !(u.Schema().IsEqual(t.Schema()) || u.Schema().IsSubset(t.Schema())) {
 		return relation.ErrSchemaMismatch
 	}
-	r := t.relationBySchema(s)
+	r := t.relationBySchema(u.Schema())
 	if r != nil {
 		return r.Append(u)
 	}
-	r, err := relation.NewRelation(u)
-	if err != nil {
-		return err
-	}
+	r = require.Must(relation.NewRelation(u))
 	t.r = append(t.r, r)
 	return nil
 }

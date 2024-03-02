@@ -1,10 +1,14 @@
-# rex
+package table_test
 
-Experimental relational NoSQL database. It is my playground for ideas and API will change over time. There is a lot more to do before it can be even considered interesting.
+import (
+	"fmt"
 
-## Example
+	"github.com/martindrlik/rex/box"
+	"github.com/martindrlik/rex/require"
+	"github.com/martindrlik/rex/table"
+	"github.com/martindrlik/rex/tuple"
+)
 
-``` go
 func Example() {
 
 	t := require.Must(table.NewTable("name", "age"))
@@ -26,4 +30,3 @@ func Example() {
 	// ┗━━━━━━┷━━━━━┛
 
 }
-```

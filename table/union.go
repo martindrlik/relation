@@ -1,12 +1,25 @@
 package table
 
-func Union(t, v *Table) (*Table, error) {
-	if !t.Schema().IsEqual(v.Schema()) {
-		return nil, ErrMustBeUnionCompatible
+import (
+	"github.com/martindrlik/rex/relation"
+	"github.com/martindrlik/rex/require"
+)
+
+func (t *Table) Union(s *Table) (*Table, error) {
+	if !t.Schema().IsEqual(s.Schema()) {
+		return nil, relation.ErrSchemaMismatch
 	}
-	nt := NewTable(t1.Schema()...)
-	add := func(t T) { nt.Add(t) }
-	t1.forEach(add)
-	t2.forEach(add)
-	return nt, nil
+
+	x := require.Must(NewTable(t.Schema().Attributes()...))
+	for _, r := range t.Relations() {
+		s := require.Must(r.Project(t.Schema().Attributes()...))
+		x.r = append(x.r, s)
+	}
+
+	for _, r := range s.Relations() {
+		for _, u := range r.Tuples() {
+			x.Append(u)
+		}
+	}
+	return x, nil
 }

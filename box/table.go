@@ -16,19 +16,15 @@ type table struct {
 }
 
 func Table(schema []string, relations []*relation.Relation) interface{ String() string } {
-	return makeTable(schema, relations)
-}
-
-func makeTable(s []string, rs []*relation.Relation) interface{ String() string } {
 	t := &table{
-		schema: s,
+		schema: schema,
 		rows:   []map[string]string{},
 		max:    map[string]int{},
 	}
 	for _, s := range t.schema {
 		t.max[s] = len(s)
 	}
-	for _, r := range rs {
+	for _, r := range relations {
 		for _, u := range r.Tuples() {
 			t.addRow(u)
 		}
