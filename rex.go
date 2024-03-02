@@ -11,40 +11,21 @@ import (
 )
 
 type rex struct {
-	ts map[string]*table.Table
-	cs map[string]command
+	ts  map[string]*table.Table
+	run func(args)
 }
 
 func newRex() *rex {
-	rex := &rex{
-		ts: map[string]*table.Table{},
-	}
-	rex.cs = map[string]command{}
-	bind := func(name string, f func(name string) command) {
-		rex.cs[name] = f(name)
-	}
-	bind("?", rex.makeHelpCommand)
-	bind(".", rex.makePrintTableCommand)
-	bind("l", rex.makeLoadCommand)
-	bind("u", rex.makeUnionCommand)
-	bind("x", rex.makeExitCommand)
+	rex := &rex{}
+	rex.ts = map[string]*table.Table{}
+	rex.run = rex.makeRunCommand()
 	return rex
 }
 
 func (rex *rex) exec(r io.Reader) {
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
-		fields := strings.Fields(scanner.Text())
-		if len(fields) == 0 {
-			continue
-		}
-		a := args(fields)
-		cmd, ok := rex.cs[a.Head()]
-		if !ok {
-			fmt.Println("unknown command")
-			continue
-		}
-		cmd.action(a.Tail())
+		rex.run(args(strings.Fields(scanner.Text())))
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Printf("failed to scan: %v\n", err)
