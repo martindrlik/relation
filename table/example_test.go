@@ -11,12 +11,12 @@ import (
 
 func Example() {
 
-	t := require.Must(table.NewTable("name", "age"))
-	t.Append(tuple.Tuple{"name": "John", "age": 42})
+	t := require.Must(table.New("name", "age"))
+	t.Append(tuple.T{"name": "John", "age": 42})
 
-	v := require.Must(table.NewTable("name", "age"))
-	v.Append(tuple.Tuple{"name": "John", "age": 42})
-	v.Append(tuple.Tuple{"name": "Jake"})
+	v := require.Must(table.New("name", "age"))
+	v.Append(tuple.T{"name": "John", "age": 42})
+	v.Append(tuple.T{"name": "Jake"})
 
 	w := require.Must(t.Union(v))
 	fmt.Print(box.Table(w.Schema().Attributes(), w.Relations()))

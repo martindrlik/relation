@@ -10,7 +10,7 @@ func (t *Table) Union(s *Table) (*Table, error) {
 		return nil, relation.ErrSchemaMismatch
 	}
 
-	x := require.Must(NewTable(t.Schema().Attributes()...))
+	x := require.Must(New(t.Schema().Attributes()...))
 	for _, r := range t.Relations() {
 		s := require.Must(r.Project(t.Schema().Attributes()...))
 		x.r = append(x.r, s)

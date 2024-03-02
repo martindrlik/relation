@@ -7,7 +7,7 @@ type Schema struct {
 	m map[string]struct{} // attributes as a set
 }
 
-func NewSchema(attributes ...string) Schema {
+func New(attributes ...string) Schema {
 	return Schema{
 		o: attributes,
 		m: maps.Slice2Set(attributes),

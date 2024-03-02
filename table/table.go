@@ -13,11 +13,11 @@ type Table struct {
 	r []*relation.Relation
 }
 
-func NewTable(attributes ...string) (*Table, error) {
+func New(attributes ...string) (*Table, error) {
 	if len(attributes) == 0 {
 		return nil, relation.ErrMissingSchema
 	}
-	x := &Table{s: schema.NewSchema(attributes...)}
+	x := &Table{s: schema.New(attributes...)}
 	return x, nil
 }
 
@@ -52,8 +52,8 @@ func (t *Table) relationBySchema(s schema.Schema) *relation.Relation {
 	return nil
 }
 
-func (t *Table) Contains(u tuple.Tuple) bool {
-	s := schema.NewSchema(maps.Keys(u)...)
+func (t *Table) Contains(u tuple.T) bool {
+	s := schema.New(maps.Keys(u)...)
 	r := t.relationBySchema(s)
 	if r == nil {
 		return false
@@ -61,8 +61,8 @@ func (t *Table) Contains(u tuple.Tuple) bool {
 	return r.Contains(u)
 }
 
-func (t *Table) Append(u tuple.Tuple, tuples ...tuple.Tuple) error {
-	tuples = append([]tuple.Tuple{u}, tuples...)
+func (t *Table) Append(u tuple.T, tuples ...tuple.T) error {
+	tuples = append([]tuple.T{u}, tuples...)
 	for _, u := range tuples {
 		if !(u.Schema().IsEqual(t.Schema()) ||
 			u.Schema().IsSubset(t.Schema())) {
@@ -74,7 +74,7 @@ func (t *Table) Append(u tuple.Tuple, tuples ...tuple.Tuple) error {
 		if r != nil {
 			return r.Append(u)
 		}
-		r = require.Must(relation.NewRelation(u))
+		r = require.Must(relation.New(u))
 		t.r = append(t.r, r)
 	}
 	return nil

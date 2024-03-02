@@ -9,10 +9,10 @@ import (
 
 func TestTuple(t *testing.T) {
 	t.Run("Equals", func(t *testing.T) {
-		u := tuple.Tuple{"name": "John", "age": 42}
-		v := tuple.Tuple{"name": "John", "age": 42}
-		w := tuple.Tuple{"name": "Jake", "age": 34}
-		x := tuple.Tuple{"city": "London"}
+		u := tuple.T{"name": "John", "age": 42}
+		v := tuple.T{"name": "John", "age": 42}
+		w := tuple.T{"name": "Jake", "age": 34}
+		x := tuple.T{"city": "London"}
 		if !u.Equals(v) {
 			t.Error("u and v should be equal")
 		}
@@ -25,9 +25,9 @@ func TestTuple(t *testing.T) {
 	})
 
 	t.Run("Project", func(t *testing.T) {
-		u := tuple.Tuple{"name": "John", "age": 42}
-		actual := u.Project(schema.NewSchema("name"))
-		expect := tuple.Tuple{"name": "John"}
+		u := tuple.T{"name": "John", "age": 42}
+		actual := u.Project(schema.New("name"))
+		expect := tuple.T{"name": "John"}
 		if !actual.Equals(expect) {
 			t.Errorf("expected %v got %v", expect, actual)
 		}

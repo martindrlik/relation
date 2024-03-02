@@ -8,17 +8,17 @@ import (
 
 type Relation struct {
 	s schema.Schema
-	t []tuple.Tuple
+	t []tuple.T
 }
 
-func NewRelation(t tuple.Tuple, others ...tuple.Tuple) (*Relation, error) {
+func New(t tuple.T, others ...tuple.T) (*Relation, error) {
 	if len(t) == 0 {
 		return nil, ErrMissingSchema
 	}
 
 	x := &Relation{
-		s: schema.NewSchema(maps.Keys(t)...),
-		t: []tuple.Tuple{t},
+		s: schema.New(maps.Keys(t)...),
+		t: []tuple.T{t},
 	}
 	for _, o := range others {
 		if !x.Schema().IsEqual(o.Schema()) {
@@ -30,7 +30,7 @@ func NewRelation(t tuple.Tuple, others ...tuple.Tuple) (*Relation, error) {
 }
 
 func (r *Relation) Schema() schema.Schema { return r.s }
-func (r *Relation) Tuples() []tuple.Tuple { return r.t }
+func (r *Relation) Tuples() []tuple.T     { return r.t }
 
 func (r *Relation) Equals(other *Relation) bool {
 	if !r.s.IsEqual(other.s) {
@@ -47,7 +47,7 @@ func (r *Relation) Equals(other *Relation) bool {
 	return true
 }
 
-func (r *Relation) Contains(u tuple.Tuple) bool {
+func (r *Relation) Contains(u tuple.T) bool {
 	for _, v := range r.t {
 		if u.Equals(v) {
 			return true
@@ -56,8 +56,8 @@ func (r *Relation) Contains(u tuple.Tuple) bool {
 	return false
 }
 
-func (r *Relation) Append(u tuple.Tuple, tuples ...tuple.Tuple) error {
-	tuples = append([]tuple.Tuple{u}, tuples...)
+func (r *Relation) Append(u tuple.T, tuples ...tuple.T) error {
+	tuples = append([]tuple.T{u}, tuples...)
 	for _, u := range tuples {
 		if !r.Schema().IsEqual(u.Schema()) {
 			return ErrSchemaMismatch
@@ -79,7 +79,7 @@ func (r *Relation) appendRelation(s *Relation) error {
 	return nil
 }
 
-func (r *Relation) append(t tuple.Tuple) {
+func (r *Relation) append(t tuple.T) {
 	if !r.Contains(t) {
 		r.t = append(r.t, t)
 	}

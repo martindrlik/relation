@@ -8,8 +8,8 @@ func (r *Relation) Project(attributes ...string) (*Relation, error) {
 	if len(attributes) == 0 {
 		return nil, ErrMissingSchema
 	}
-	s := schema.NewSchema(attributes...)
-	x, err := NewRelation(r.t[0].Project(s))
+	s := schema.New(attributes...)
+	x, err := New(r.t[0].Project(s))
 	if err != nil {
 		return nil, err
 	}

@@ -2,8 +2,8 @@ package tuple
 
 import "github.com/martindrlik/rex/schema"
 
-func (t Tuple) Project(schema schema.Schema) Tuple {
-	x := Tuple{}
+func (t T) Project(schema schema.Schema) T {
+	x := T{}
 	for _, a := range schema.Attributes() {
 		x[a] = t[a]
 	}

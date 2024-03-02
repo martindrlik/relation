@@ -32,7 +32,7 @@ func Table(schema []string, relations []*relation.Relation) interface{ String() 
 	return t
 }
 
-func (t *table) addRow(u tuple.Tuple) {
+func (t *table) addRow(u tuple.T) {
 	str := func(v any) string { return fmt.Sprintf("%v", v) }
 	row := map[string]string{}
 	for k, v := range u {

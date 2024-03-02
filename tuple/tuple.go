@@ -7,13 +7,13 @@ import (
 	"github.com/martindrlik/rex/schema"
 )
 
-type Tuple map[string]any
+type T map[string]any
 
-func (t Tuple) Schema() schema.Schema {
-	return schema.NewSchema(maps.Keys(t)...)
+func (t T) Schema() schema.Schema {
+	return schema.New(maps.Keys(t)...)
 }
 
-func (t Tuple) Equals(other Tuple) bool {
+func (t T) Equals(other T) bool {
 	if len(t) != len(other) {
 		return false
 	}

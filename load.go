@@ -58,7 +58,7 @@ func (rex *rex) loadTable(name string, m map[string]any) {
 		fmt.Printf("failed to load table %s: rows not found\n", name)
 		return
 	}
-	x, err := table.NewTable(fmap(s, func(a any) string { return a.(string) })...)
+	x, err := table.New(fmap(s, func(a any) string { return a.(string) })...)
 	if err != nil {
 		fmt.Printf("failed to load table %s: %v\n", name, err)
 		return

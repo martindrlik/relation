@@ -11,16 +11,16 @@ import (
 
 func ExampleTable() {
 
-	t := require.Must(table.NewTable("title", "year"))
-	require.Panic(t.Append(tuple.Tuple{"title": "Adventure Time"}))
-	require.Panic(t.Append(tuple.Tuple{"title": "What We Do in the Shadows", "year": 2019}))
+	t := require.Must(table.New("title", "year"))
+	require.Panic(t.Append(tuple.T{"title": "Adventure Time"}))
+	require.Panic(t.Append(tuple.T{"title": "What We Do in the Shadows", "year": 2019}))
 
 	fmt.Println(box.Table(t.Schema().Attributes(), t.Relations()))
 
 	v := require.Must(t.Project("title"))
 	fmt.Println(box.Table(v.Schema().Attributes(), v.Relations()))
 
-	empty := require.Must(table.NewTable("title", "year"))
+	empty := require.Must(table.New("title", "year"))
 	fmt.Println(box.Table(empty.Schema().Attributes(), empty.Relations()))
 
 	// Output:

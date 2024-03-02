@@ -10,7 +10,7 @@ func (t *Table) Project(attributes ...string) (*Table, error) {
 		return nil, relation.ErrMissingSchema
 	}
 
-	x := require.Must(NewTable(attributes...))
+	x := require.Must(New(attributes...))
 	for _, r := range t.Relations() {
 		s, err := r.Project(attributes...)
 		if err != nil {
