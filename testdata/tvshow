@@ -1,7 +1,0 @@
-{"schema": ["title", "year"], "rows": [
-    {"title": "Adventure Time", "year": 2010},
-    {"title": "Stranger Things", "year": 2016},
-    {"title": "The Mandalorian", "year": 2019},
-    {"title": "What We Do in the Shadows", "year": 2019},
-    {"title": "The Witcher"}
-]}

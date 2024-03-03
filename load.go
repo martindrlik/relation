@@ -2,81 +2,89 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
-	"path"
 
 	"github.com/martindrlik/rex/table"
 )
 
-func (rex *rex) loadFile(name string) {
+func loadFile(name string) (*table.Table, error) {
 	f, err := os.Open(name)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return nil, err
 	}
 	defer f.Close()
-
-	rex.loadReader(path.Base(name), f)
+	return decode(f)
 }
 
-func (rex *rex) loadReader(name string, r io.Reader) {
+func decode(r io.Reader) (*table.Table, error) {
 	dec := json.NewDecoder(r)
-	for {
-		m, err := tryDecode[map[string]any](dec)
-		if err != nil && err != io.EOF {
-			fmt.Printf("failed to decode: %v\n", err)
-		}
+	raw := map[string]any{}
+	err := dec.Decode(&raw)
+	if err != nil && err != io.EOF {
+		return nil, err
+	}
 
-		rex.loadTable(name, m)
-
-		if err != nil {
-			break
-		}
-	}
-}
-
-func tryDecode[T any](dec *json.Decoder) (t T, err error) {
-	if err := dec.Decode(&t); err != nil {
-		return t, err
-	}
-	return t, nil
-}
-
-func (rex *rex) loadTable(name string, m map[string]any) {
-	if len(m) == 0 {
-		return
-	}
-	s, ok := m["schema"].([]any)
-	if !ok {
-		fmt.Printf("failed to load table %s: schema not found\n", name)
-		return
-	}
-	rows, ok := m["rows"].([]any)
-	if !ok {
-		fmt.Printf("failed to load table %s: rows not found\n", name)
-		return
-	}
-	x, err := table.New(fmap(s, func(a any) string { return a.(string) })...)
+	schema, err := decodeSchema(raw)
 	if err != nil {
-		fmt.Printf("failed to load table %s: %v\n", name, err)
-		return
+		return nil, err
 	}
+
+	x, err := table.New(schema...)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := decodeRows(raw, schema)
+	if err != nil {
+		return nil, err
+	}
+
 	for _, row := range rows {
-		err := x.Append(row.(map[string]any))
-		if err != nil {
-			fmt.Printf("failed to append tuple to table %s: %v\n", name, err)
-			return
+		if err := x.Append(row); err != nil {
+			return nil, err
 		}
 	}
-	rex.ts[name] = x
+
+	return x, nil
 }
 
-func fmap[T any](s []any, f func(any) T) []T {
-	t := make([]T, len(s))
-	for i, v := range s {
-		t[i] = f(v)
+func decodeSchema(raw map[string]any) ([]string, error) {
+	anySchema, ok := raw["schema"].([]any)
+	if !ok {
+		return nil, errors.New("missing schema")
 	}
-	return t
+	schema := []string{}
+	for _, s := range anySchema {
+		schema = append(schema, fmt.Sprintf("%v", s))
+	}
+	return schema, nil
+}
+
+func decodeRows(raw map[string]any, schema []string) ([]map[string]any, error) {
+	anyRows, ok := raw["rows"].([]any)
+	if !ok {
+		return nil, errors.New("missing rows")
+	}
+	rows := []map[string]any{}
+	for _, anyRow := range anyRows {
+		switch row := anyRow.(type) {
+		case map[string]any:
+			rows = append(rows, row)
+		case []any:
+			if len(schema) != len(row) {
+				return nil, fmt.Errorf("tuple length mismatch: %d != %d", len(schema), len(row))
+			}
+			x := map[string]any{}
+			for i, v := range schema {
+				x[v] = row[i]
+			}
+			rows = append(rows, x)
+		default:
+			return nil, fmt.Errorf("unsupported row type %v: %T", anyRow, row)
+		}
+	}
+	return rows, nil
 }

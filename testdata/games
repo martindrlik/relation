@@ -1,5 +1,0 @@
-{"schema": ["title", "first release", "genre", "developer", "creator", "publisher"], "rows": [
-    {"title": "Doom Eternal", "first release": "2020-03-20", "genre": "First-person shooter", "developer": "id Software", "creator": "Hugo Martin", "publisher": "Bethesda Softworks"},
-    {"title": "Red Dead Redemption 2", "first release": "2018-10-26", "genre": "Action-adventure", "developer": "Rockstar Studios", "creator": "Dan Houser", "publisher": "Rockstar Games"},
-    {"title": "Half-Life: Alyx", "first release": "2020-03-23", "genre": "First-person shooter", "developer": "Valve", "creator": "David Speyrer", "publisher": "Valve"}
-]}

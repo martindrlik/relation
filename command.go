@@ -107,16 +107,23 @@ func (rex *rex) makeLoadCommand(name string) command {
 		fmt.Println("  load table from file filename")
 		fmt.Printf("usage: %s filename1 filename2 ...\n", name)
 		fmt.Println("  load tables from files filename1 filename2 and from all other listed file names")
+		fmt.Printf("usage: %s foo/*\n", name)
+		fmt.Println("  load tables from all files in directory foo")
 	}
 	load := func(a args) {
-		for _, name := range a {
-			names, err := filepath.Glob(name)
+		for _, pattern := range a {
+			names, err := filepath.Glob(pattern)
 			if err != nil {
-				fmt.Printf("failed to load %q: %v\n", name, err)
-				return
+				fmt.Printf("failed to expand pattern %q: %v\n", pattern, err)
+				continue
 			}
 			for _, name := range names {
-				rex.loadFile(name)
+				x, err := loadFile(name)
+				if err != nil {
+					fmt.Printf("failed to load file %s: %v\n", name, err)
+					continue
+				}
+				rex.ts[name] = x
 			}
 		}
 	}

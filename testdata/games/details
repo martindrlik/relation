@@ -1,0 +1,9 @@
+{"schema": ["title", "year", "creator", "developer", "publisher", "rating"], "rows": [
+    ["Mass Effect 2", 2010, "BioWare", "BioWare", "Electronic Arts", 9.5],
+    ["Borderlands 2", 2012, "Gearbox Software", "Gearbox Software", "2K Games", 9.0],
+    ["The Witcher 3: Wild Hunt", 2015, "CD Projekt Red", "CD Projekt Red", "CD Projekt", 9.5],
+    ["Dreamfall The longest jorney", 2006, "Funcom", "Funcom", "Aspyr Media", 8.5],
+    ["Assassin's Creed: Brotherhood", 2010, "Ubisoft Montreal", "Ubisoft", "Ubisoft", 9.0],
+    ["Doom Ethernal", 2020, "id Software", "id Software", "Bethesda Softworks", 9.0],
+    ["Terraria", 2011, "Re-Logic", "Re-Logic", "Re-Logic", 9.0]
+]}
