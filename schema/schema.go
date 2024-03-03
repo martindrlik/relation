@@ -38,3 +38,13 @@ func (s Schema) isSubsetOrEqual(other Schema) bool {
 	}
 	return true
 }
+
+func (s Schema) Intersection(other Schema) Schema {
+	x := []string{}
+	for k := range s.m {
+		if other.Contains(k) {
+			x = append(x, k)
+		}
+	}
+	return New(x...)
+}

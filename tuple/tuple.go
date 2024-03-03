@@ -24,3 +24,14 @@ func (t T) Equals(other T) bool {
 	}
 	return true
 }
+
+func (t T) Join(other T) T {
+	x := T{}
+	for k, v := range t {
+		x[k] = v
+	}
+	for k, v := range other {
+		x[k] = v
+	}
+	return x
+}

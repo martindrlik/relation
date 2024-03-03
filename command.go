@@ -64,7 +64,7 @@ func (rex *rex) makeHelpCommand(name string, m map[string]command) command {
 			}
 			return
 		}
-		x := require.Must(table.New("name", "description"))
+		x := require.NoError(table.New("name", "description"))
 		sorted := maps.Keys(m)
 		sort.Strings(sorted)
 		for _, k := range sorted {
@@ -87,7 +87,7 @@ func (rex *rex) makePrintTableCommand(name string) command {
 	}
 	tables := func(a args) {
 		if len(a) == 0 {
-			x := require.Must(table.New("name"))
+			x := require.NoError(table.New("name"))
 			for name := range rex.ts {
 				x.Append(tuple.T{"name": name})
 			}

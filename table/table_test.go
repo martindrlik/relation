@@ -2,47 +2,74 @@ package table_test
 
 import (
 	"testing"
+
+	"github.com/martindrlik/rex/relation"
+	"github.com/martindrlik/rex/require"
+	"github.com/martindrlik/rex/table"
+	"github.com/martindrlik/rex/tuple"
 )
 
 func TestTable(t *testing.T) {
-	// t.Run("Equal", func(t *testing.T) {
-	// 	t1 := rex.NewTable("name", "age").Append(tuple.Tuple{"name": "John", "age": 42})
-	// 	t2 := rex.NewTable("name", "age").Append(tuple.Tuple{"name": "John", "age": 42})
-	// 	if !t1.Equal(t2) {
-	// 		t.Error("t1 and t2 should be equal")
-	// 	}
-	// })
 
-	// t.Run("NotEqual", func(t *testing.T) {
-	// 	t1 := rex.NewTable("name", "age").Append(tuple.Tuple{"name": "John", "age": 42})
-	// 	t2 := rex.NewTable("name", "age").Append(tuple.Tuple{"name": "Jake", "age": 34})
-	// 	t3 := rex.NewTable("name", "age", "city").Append(tuple.Tuple{"name": "John", "age": 42, "city": "London"})
-	// 	t4 := rex.NewTable("name", "age").Append(tuple.Tuple{"name": "John", "age": 42}).Append(tuple.Tuple{"name": "Jake", "age": 34})
-	// 	if t1.Equal(t2) {
-	// 		t.Error("t1 and t2 should not be equal")
-	// 	}
-	// 	if t1.Equal(t3) {
-	// 		t.Error("t1 and t3 should not be equal (different schema)")
-	// 	}
-	// 	if t1.Equal(t4) {
-	// 		t.Error("t1 and t4 should not be equal (t4 has more tuples)")
-	// 	}
-	// })
+	t.Run("Equals", func(t *testing.T) {
+		u := require.NoError(table.New("name", "age"))
+		v := require.NoError(table.New("name", "age"))
+		u.Append(tuple.T{"name": "John", "age": 42})
+		v.Append(tuple.T{"name": "John", "age": 42})
+		if !u.Equals(v) {
+			t.Error("u and v should be equal")
+		}
 
-	// t.Run("SchemaInOrder", func(t *testing.T) {
-	// 	t1 := rex.NewTable("name", "age")
-	// 	if !slices.Equal(t1.Schema(), []string{"name", "age"}) {
-	// 		t.Errorf("t1 schema is expected to be %v got %v", []string{"name", "age"}, t1.SchemaSet())
-	// 	}
-	// })
+		w := require.NoError(table.New("name", "age"))
+		w.Append(tuple.T{"name": "Jake", "age": 34})
+		if u.Equals(w) {
+			t.Error("u and w should not be equal")
+		}
 
-	// t.Run("Union", func(t *testing.T) {
-	// 	u1 := rex.NewTable("name", "age").Append(tuple.Tuple{"name": "John", "age": 42})
-	// 	u2 := rex.NewTable("name", "age").Append(tuple.Tuple{"name": "Jake"})
-	// 	expect := rex.NewTable("name", "age").Append(tuple.Tuple{"name": "John", "age": 42}).Append(tuple.Tuple{"name": "Jake"})
-	// 	actual := require.Must(rex.Union(u1, u2))
-	// 	if !actual.Equal(expect) {
-	// 		t.Error("u1 union u2 should be equal to u12")
-	// 	}
-	// })
+		x := require.NoError(table.New("name", "age"))
+		x.Append(tuple.T{"name": "Lisa"})
+		if u.Equals(x) {
+			t.Error("u and x should not be equal")
+		}
+
+		z := require.NoError(table.New("name", "age"))
+		z.Append(
+			tuple.T{"name": "John", "age": 42},
+			tuple.T{"name": "Lisa"})
+		if u.Equals(z) {
+			t.Error("u and z should not be equal")
+		}
+
+		q := require.NoError(table.New("name"))
+		q.Append(tuple.T{"name": "John"})
+		if u.Equals(q) {
+			t.Error("u and q should not be equal")
+		}
+	})
+
+	t.Run("Contains", func(t *testing.T) {
+		x := require.NoError(table.New("name", "age"))
+		x.Append(tuple.T{"name": "John", "age": 42})
+		u := tuple.T{"name": "John", "age": 42}
+		v := tuple.T{"name": "Jake", "age": 34}
+		w := tuple.T{"city": "London"}
+		if !x.Contains(u) {
+			t.Error("x should contain u")
+		}
+		if x.Contains(v) {
+			t.Error("x should not contain v")
+		}
+		if x.Contains(w) {
+			t.Error("x should not contain w")
+		}
+	})
+
+	t.Run("Append", func(t *testing.T) {
+		x := require.NoError(table.New("name", "age"))
+		u := tuple.T{"name": "John", "age": 42, "city": "London"}
+		if err := x.Append(u); err != relation.ErrSchemaMismatch {
+			t.Errorf("expected error %v got %v", relation.ErrSchemaMismatch, err)
+		}
+	})
+
 }

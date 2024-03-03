@@ -1,14 +1,14 @@
 package require
 
-// Must panics if err is not nil otherwise returns t.
-func Must[T any](t T, err error) T {
+// NoError panics if err is not nil otherwise returns t.
+func NoError[T any](t T, err error) T {
 	if err != nil {
 		panic(err)
 	}
 	return t
 }
 
-func Panic(err error) {
+func NilError(err error) {
 	if err != nil {
 		panic(err)
 	}

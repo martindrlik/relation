@@ -11,17 +11,13 @@ import (
 
 func ExampleTable() {
 
-	t := require.Must(table.New("title", "year"))
-	require.Panic(t.Append(tuple.T{"title": "Adventure Time"}))
-	require.Panic(t.Append(tuple.T{"title": "What We Do in the Shadows", "year": 2019}))
-
-	fmt.Println(box.Table(t.Schema().Attributes(), t.Relations()))
-
-	v := require.Must(t.Project("title"))
-	fmt.Println(box.Table(v.Schema().Attributes(), v.Relations()))
-
-	empty := require.Must(table.New("title", "year"))
-	fmt.Println(box.Table(empty.Schema().Attributes(), empty.Relations()))
+	t := require.NoError(table.New("title", "year"))
+	require.NilError(t.Append(tuple.T{"title": "Adventure Time"}))
+	require.NilError(t.Append(tuple.T{"title": "What We Do in the Shadows", "year": 2019}))
+	fmt.Println(box.Table(t))
+	fmt.Println(box.Table(t.Project("title")))
+	empty := require.NoError(table.New("title", "year"))
+	fmt.Println(box.Table(empty))
 
 	// Output:
 	// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┯━━━━━━┓

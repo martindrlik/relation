@@ -42,5 +42,5 @@ func (rex *rex) printTableByName(name string) {
 }
 
 func (rex *rex) printTable(x *table.Table) {
-	fmt.Print(box.Table(x.Schema().Attributes(), x.Relations()))
+	fmt.Print(box.Table(x))
 }

@@ -21,8 +21,7 @@ func New(attributes ...string) (*Table, error) {
 	return x, nil
 }
 
-func (t *Table) Schema() schema.Schema           { return t.s }
-func (t *Table) Relations() []*relation.Relation { return t.r }
+func (t *Table) Schema() schema.Schema { return t.s }
 
 func (t *Table) Equals(other *Table) bool {
 	if !t.s.IsEqual(other.s) {
@@ -32,33 +31,21 @@ func (t *Table) Equals(other *Table) bool {
 		return false
 	}
 	for _, r := range t.r {
-		s := other.relationBySchema(r.Schema())
-		if s == nil {
+		rs := other.Relations(Matching(r.Schema()))
+		if len(rs) != 1 {
 			return false
 		}
-		if !r.Equals(s) {
+		if !r.Equals(rs[0]) {
 			return false
 		}
 	}
 	return true
 }
 
-func (t *Table) relationBySchema(s schema.Schema) *relation.Relation {
-	for _, r := range t.r {
-		if r.Schema().IsEqual(s) {
-			return r
-		}
-	}
-	return nil
-}
-
 func (t *Table) Contains(u tuple.T) bool {
 	s := schema.New(maps.Keys(u)...)
-	r := t.relationBySchema(s)
-	if r == nil {
-		return false
-	}
-	return r.Contains(u)
+	rs := t.Relations(Matching(s))
+	return len(rs) == 1 && rs[0].Contains(u)
 }
 
 func (t *Table) Append(u tuple.T, tuples ...tuple.T) error {
@@ -70,12 +57,17 @@ func (t *Table) Append(u tuple.T, tuples ...tuple.T) error {
 		}
 	}
 	for _, u := range tuples {
-		r := t.relationBySchema(u.Schema())
-		if r != nil {
-			return r.Append(u)
+		rs := t.Relations(Matching(u.Schema()))
+
+		if len(rs) != 1 {
+			r := require.NoError(relation.New(u))
+			t.r = append(t.r, r)
+			continue
 		}
-		r = require.Must(relation.New(u))
-		t.r = append(t.r, r)
+
+		if err := rs[0].Append(u); err != nil {
+			return err
+		}
 	}
 	return nil
 }

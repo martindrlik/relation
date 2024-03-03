@@ -10,13 +10,13 @@ func (t *Table) Union(s *Table) (*Table, error) {
 		return nil, relation.ErrSchemaMismatch
 	}
 
-	x := require.Must(New(t.Schema().Attributes()...))
-	for _, r := range t.Relations() {
-		s := require.Must(r.Project(t.Schema().Attributes()...))
+	x := require.NoError(New(t.Schema().Attributes()...))
+	for _, r := range t.Relations(All) {
+		s := require.NoError(r.Project(t.Schema().Attributes()...))
 		x.r = append(x.r, s)
 	}
 
-	for _, r := range s.Relations() {
+	for _, r := range s.Relations(All) {
 		for _, u := range r.Tuples() {
 			x.Append(u)
 		}

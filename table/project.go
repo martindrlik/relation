@@ -1,27 +1,26 @@
 package table
 
 import (
-	"github.com/martindrlik/rex/relation"
 	"github.com/martindrlik/rex/require"
+	"github.com/martindrlik/rex/tuple"
 )
 
-func (t *Table) Project(attributes ...string) (*Table, error) {
-	if len(attributes) == 0 {
-		return nil, relation.ErrMissingSchema
-	}
-
-	x := require.Must(New(attributes...))
-	for _, r := range t.Relations() {
-		s, err := r.Project(attributes...)
-		if err != nil {
-			return nil, err
+func (t *Table) Project(attribute string, others ...string) *Table {
+	others = append([]string{attribute}, others...)
+	x := require.NoError(New(others...))
+	for _, r := range t.Relations(All) {
+		for _, u := range r.Tuples() {
+			require.NilError(x.Append(func() tuple.T {
+				switch {
+				case x.Schema().IsSubset(u.Schema()):
+					return u.Project(x.Schema())
+				case u.Schema().IsSubset(x.Schema()):
+					return u.Project(u.Schema())
+				default:
+					return u.Project(x.Schema())
+				}
+			}()))
 		}
-		for _, u := range s.Tuples() {
-			err := x.Append(u)
-			if err != nil {
-				return nil, err
-			}
-		}
 	}
-	return x, nil
+	return x
 }

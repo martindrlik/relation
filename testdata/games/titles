@@ -1,11 +1,11 @@
-{"schema": ["title"], "rows": [
-    ["Assassin's Creed: Brotherhood"],
-    ["Borderlands 2"],
-    ["Doom Ethernal"],
-    ["Dreamfall The longest jorney"],
-    ["Mass Effect 2"],
-    ["Red Dead Redemption 2"],
-    ["Sekiro: Shadows Die Twice"],
-    ["Terraria"],
-    ["The Witcher 3: Wild Hunt"]
+{"schema": ["title", "year"], "rows": [
+    ["Assassin's Creed: Brotherhood", 2010],
+    ["Borderlands 2", 2012],
+    ["Doom Ethernal", 2020],
+    ["Dreamfall The longest jorney", 2006],
+    ["Mass Effect 2", 2010],
+    ["Red Dead Redemption 2", 2018],
+    ["Sekiro: Shadows Die Twice", 2019],
+    ["Terraria", 2011],
+    ["The Witcher 3: Wild Hunt", 2015]
 ]}

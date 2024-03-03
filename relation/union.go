@@ -9,7 +9,7 @@ func (r *Relation) Union(others ...*Relation) (*Relation, error) {
 		}
 	}
 
-	x := require.Must(r.Project(r.Schema().Attributes()...))
+	x := require.NoError(r.Project(r.Schema().Attributes()...))
 
 	for _, o := range others {
 		x.appendRelation(o)
