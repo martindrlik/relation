@@ -5,25 +5,31 @@ Experimental relational NoSQL database. It is my playground for ideas and API wi
 ## Example
 
 ``` go
-func Example() {
+package example
 
-	t := require.NoError(table.New("name", "age"))
-	t.Append(tuple.T{"name": "John", "age": 42})
+import (
+	"fmt"
 
-	v := require.NoError(table.New("name", "age"))
-	v.Append(tuple.T{"name": "John", "age": 42})
-	v.Append(tuple.T{"name": "Jake"})
+	"github.com/martindrlik/rex/box"
+	"github.com/martindrlik/rex/table"
+)
 
-	w := require.NoError(t.Union(v))
-	fmt.Print(box.Table(w))
+func ExampleTable() {
+	movies := table.New().Add(
+		map[string]any{"title": "The Matrix", "year": 1999},
+		map[string]any{"title": "Dune", "year": 2021, "length": 155},
+		map[string]any{"title": "Blade Runner: 2049", "year": 2017, "length": 164})
+
+	fmt.Println(box.Table([]string{"title", "year", "length"}, movies.Tuples()...))
 
 	// Output:
-	// ┏━━━━━━┯━━━━━┓
-	// ┃ name │ age ┃
-	// ┠──────┼─────┨
-	// ┃ John │ 42  ┃
-	// ┃ Jake │ *   ┃
-	// ┗━━━━━━┷━━━━━┛
-
+	// ┏━━━━━━━━━━━━━━━━━━━━┯━━━━━━┯━━━━━━━━┓
+	// ┃ title              │ year │ length ┃
+	// ┠────────────────────┼──────┼────────┨
+	// ┃ The Matrix         │ 1999 │ ?      ┃
+	// ┃ Dune               │ 2021 │ 155    ┃
+	// ┃ Blade Runner: 2049 │ 2017 │ 164    ┃
+	// ┗━━━━━━━━━━━━━━━━━━━━┷━━━━━━┷━━━━━━━━┛
 }
+
 ```

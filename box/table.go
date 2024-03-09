@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"io"
 	"strings"
-
-	"github.com/martindrlik/rex/table"
-	"github.com/martindrlik/rex/tuple"
 )
 
 type boxTable struct {
@@ -15,27 +12,25 @@ type boxTable struct {
 	max    map[string]int
 }
 
-func Table(x *table.Table) interface{ String() string } {
+func Table(schema []string, tuples ...map[string]any) interface{ String() string } {
 	t := &boxTable{
-		schema: x.Schema().Attributes(),
+		schema: schema,
 		rows:   []map[string]string{},
 		max:    map[string]int{},
 	}
 	for _, s := range t.schema {
 		t.max[s] = len(s)
 	}
-	for _, r := range x.Relations(table.All) {
-		for _, u := range r.Tuples() {
-			t.addRow(u)
-		}
+	for _, tuple := range tuples {
+		t.addRow(tuple)
 	}
 	return t
 }
 
-func (t *boxTable) addRow(u tuple.T) {
+func (t *boxTable) addRow(tuple map[string]any) {
 	str := func(v any) string { return fmt.Sprintf("%v", v) }
 	row := map[string]string{}
-	for k, v := range u {
+	for k, v := range tuple {
 		s := str(v)
 		if l := len(s); t.max[k] < l {
 			t.max[k] = l
@@ -99,7 +94,7 @@ func val(v string, ok bool) string {
 	if ok {
 		return v
 	}
-	return "*"
+	return "?"
 }
 
 func (t *boxTable) writeRow(w io.Writer, left, middle, right string, valueFunc func(string) string) {

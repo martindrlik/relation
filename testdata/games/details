@@ -1,9 +1,0 @@
-{"schema": ["title", "creator", "developer", "publisher", "rating"], "rows": [
-    ["Assassin's Creed: Brotherhood", "Ubisoft Montreal", "Ubisoft", "Ubisoft", 9.0],
-    ["Borderlands 2", "Gearbox Software", "Gearbox Software", "2K Games", 9.0],
-    ["Doom Ethernal", "id Software", "id Software", "Bethesda Softworks", 9.0],
-    ["Dreamfall The longest jorney", "Funcom", "Funcom", "Aspyr Media", 8.5],
-    ["Mass Effect 2", "BioWare", "BioWare", "Electronic Arts", 9.5],
-    ["Terraria", "Re-Logic", "Re-Logic", "Re-Logic", 9.0],
-    ["The Witcher 3: Wild Hunt", "CD Projekt Red", "CD Projekt Red", "CD Projekt", 9.5]
-]}
