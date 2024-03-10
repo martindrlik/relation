@@ -26,6 +26,23 @@ func (t *Table) Contains(tuple map[string]any) bool {
 	return false
 }
 
+func (t *Table) Schema() map[string]struct{} {
+	x := map[string]struct{}{}
+	for _, tuple := range t.tuples {
+		for k := range tuple {
+			x[k] = struct{}{}
+		}
+	}
+	return x
+}
+
 func (t *Table) Tuples() []map[string]any {
 	return t.tuples
+}
+
+func (t *Table) isCompleteTuple() func(tuple map[string]any) bool {
+	schema := t.Schema()
+	return func(tuple map[string]any) bool {
+		return len(schema) == len(tuple)
+	}
 }
