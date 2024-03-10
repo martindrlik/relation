@@ -31,6 +31,17 @@ func (t *Table) Tuples() Tuples {
 	return t.tuples
 }
 
+func (t *Table) CompleteTuples() []map[string]any {
+	x := []map[string]any{}
+	isComplete := t.isCompleteTuple()
+	for _, tuple := range t.tuples {
+		if isComplete(tuple) {
+			x = append(x, tuple)
+		}
+	}
+	return x
+}
+
 func (t *Table) isCompleteTuple() func(tuple map[string]any) bool {
 	schema := t.Schema()
 	return func(tuple map[string]any) bool {

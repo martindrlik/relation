@@ -14,11 +14,13 @@ import (
 	"github.com/martindrlik/rex/table"
 )
 
+type T = map[string]any
+
 func ExampleTable() {
 	movies := table.New().Add(
-		map[string]any{"title": "The Matrix", "year": 1999},
-		map[string]any{"title": "Dune", "year": 2021, "length": 155},
-		map[string]any{"title": "Blade Runner: 2049", "year": 2017, "length": 164})
+		T{"title": "The Matrix", "year": 1999},
+		T{"title": "Dune", "year": 2021, "length": 155},
+		T{"title": "Blade Runner: 2049", "year": 2017, "length": 164})
 
 	fmt.Println(box.Table([]string{"title", "year", "length"}, movies.Tuples()...))
 
