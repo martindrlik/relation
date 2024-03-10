@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"unicode/utf8"
 )
 
 type boxTable struct {
@@ -19,7 +20,7 @@ func Table(schema []string, tuples ...map[string]any) interface{ String() string
 		max:    map[string]int{},
 	}
 	for _, s := range t.schema {
-		t.max[s] = len(s)
+		t.max[s] = utf8.RuneCountInString(s)
 	}
 	for _, tuple := range tuples {
 		t.addRow(tuple)
@@ -32,7 +33,7 @@ func (t *boxTable) addRow(tuple map[string]any) {
 	row := map[string]string{}
 	for k, v := range tuple {
 		s := str(v)
-		if l := len(s); t.max[k] < l {
+		if l := utf8.RuneCountInString(s); t.max[k] < l {
 			t.max[k] = l
 		}
 		row[k] = s
@@ -109,5 +110,5 @@ func (t *boxTable) writeRow(w io.Writer, left, middle, right string, valueFunc f
 }
 
 func (bt *boxTable) pad(s, v string) string {
-	return fmt.Sprintf("%s%s", v, strings.Repeat(" ", bt.max[s]-len(v)))
+	return fmt.Sprintf("%s%s", v, strings.Repeat(" ", bt.max[s]-utf8.RuneCountInString(v)))
 }

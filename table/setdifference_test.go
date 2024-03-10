@@ -9,10 +9,10 @@ import (
 
 func ExampleTable_SetDifference() {
 	available := table.New().Add(
-		map[string]any{"title": "Dune"},
-		map[string]any{"title": "Dune: Part Two", "year": 2024})
+		T{"title": "Dune"},
+		T{"title": "Dune: Part Two", "year": 2024})
 	seen := table.New().Add(
-		map[string]any{"title": "Dune"})
+		T{"title": "Dune"})
 
 	fmt.Println(box.Table([]string{"title"}, available.SetDifference(seen).Tuples()...))
 
