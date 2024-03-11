@@ -21,6 +21,18 @@ func ExampleTable_NaturalJoin() {
 
 	fmt.Println(box.Table([]string{"title", "year", "actor"}, movies.NaturalJoin(actors).Tuples()...))
 
+	numbers := table.New().Add(
+		T{"number": 1},
+		T{"number": 2},
+		T{"number": 3})
+	letters := table.New().Add(
+		T{"letter": "a"},
+		T{"letter": "b"},
+		T{"letter": "c"})
+
+	fmt.Println("Cartesian product:")
+	fmt.Println(box.Table([]string{"number", "letter"}, numbers.NaturalJoin(letters).Tuples()...))
+
 	// Output:
 	// ┏━━━━━━━━━━━━┯━━━━━━┯━━━━━━━━━━━━━━━━━━━━┓
 	// ┃ title      │ year │ actor              ┃
@@ -32,4 +44,19 @@ func ExampleTable_NaturalJoin() {
 	// ┃ Dune       │ 2021 │ Rebecca Ferguson   ┃
 	// ┃ Dune       │ 2021 │ Zendaya            ┃
 	// ┗━━━━━━━━━━━━┷━━━━━━┷━━━━━━━━━━━━━━━━━━━━┛
+	//
+	// Cartesian product:
+	// ┏━━━━━━━━┯━━━━━━━━┓
+	// ┃ number │ letter ┃
+	// ┠────────┼────────┨
+	// ┃ 1      │ a      ┃
+	// ┃ 1      │ b      ┃
+	// ┃ 1      │ c      ┃
+	// ┃ 2      │ a      ┃
+	// ┃ 2      │ b      ┃
+	// ┃ 2      │ c      ┃
+	// ┃ 3      │ a      ┃
+	// ┃ 3      │ b      ┃
+	// ┃ 3      │ c      ┃
+	// ┗━━━━━━━━┷━━━━━━━━┛
 }
