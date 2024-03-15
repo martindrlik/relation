@@ -33,7 +33,6 @@ func binaryOp(op string) func([]*table.Table) []*table.Table {
 		if desc, ok := ops[op]; ok {
 			return desc.fn(a, b)
 		}
-		usage(fmt.Errorf("unknown op: %s", op))
 		panic("unreachable")
 	})
 }
@@ -56,7 +55,7 @@ func project(table *table.Table, attributes []string) {
 	fmt.Println(box.Table(attributes, table.Project(attributes...).Tuples()...))
 }
 
-func parse(args []string) (op string, tables []*table.Table, attributes []string) {
+func parse(args []string) (string, []*table.Table, []string) {
 	if len(args) < 2 {
 		usage(errors.New("missing arguments"))
 	}
@@ -68,16 +67,18 @@ func parse(args []string) (op string, tables []*table.Table, attributes []string
 	fs.Var(&names, "t", "table file")
 	fs.Var(&jsons, "j", "inline json")
 
-	op = args[0]
+	op := args[0]
+	_, ok := ops[op]
+	if !ok {
+		usage(fmt.Errorf("unknown op: %s", op))
+	}
 
 	fs.Parse(args[1:])
 	if len(names) == 0 {
 		usage(errors.New("missing table files: -t filename"))
 	}
 
-	attributes = fs.Args()
-
-	tables = func() []*table.Table {
+	tables := func() []*table.Table {
 		tables, err := load.TableFiles(names...)
 		if err != nil {
 			usage(fmt.Errorf("loading table: %w", err))
@@ -92,7 +93,8 @@ func parse(args []string) (op string, tables []*table.Table, attributes []string
 		}
 		tables = append(tables, t)
 	}
-	return
+
+	return op, tables, fs.Args()
 }
 
 type stringsFlag []string
