@@ -1,6 +1,6 @@
 [
-	{"title": "Blade Runner 2049", "year": 2017, "directed_by": "Denis Villeneuve"},
-	{"title": "Dune", "year": 2021, "directed_by": "Denis Villeneuve"},
-	{"title": "Guardians of the Galaxy Vol. 3", "year": 2023, "directed_by": "James Gunn"},
-	{"title": "Dune: Part Two", "year": 2024, "directed_by": "Denis Villeneuve"}
+	{"title": "Blade Runner 2049", "year": 2017, "director": "Denis Villeneuve"},
+	{"title": "Dune", "year": 2021, "director": "Denis Villeneuve"},
+	{"title": "Guardians of the Galaxy Vol. 3", "year": 2023, "director": "James Gunn"},
+	{"title": "Dune: Part Two", "year": 2024, "director": "Denis Villeneuve"}
 ]

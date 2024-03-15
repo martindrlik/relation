@@ -3,6 +3,7 @@ package load
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/martindrlik/rex/table"
@@ -26,7 +27,11 @@ func loadTableFile(name string) (*table.Table, error) {
 		return nil, err
 	}
 	defer f.Close()
-	dec := json.NewDecoder(f)
+	return Decode(f)
+}
+
+func Decode(r io.Reader) (*table.Table, error) {
+	dec := json.NewDecoder(r)
 	tuples := []map[string]any{}
 	if err := dec.Decode(&tuples); err != nil {
 		return nil, err

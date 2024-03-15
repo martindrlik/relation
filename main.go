@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"slices"
+	"strings"
 
 	"github.com/martindrlik/rex/box"
 	"github.com/martindrlik/rex/load"
@@ -59,15 +60,23 @@ func parse(args []string) (op string, tables []*table.Table, attributes []string
 	if len(args) < 2 {
 		usage(errors.New("missing arguments"))
 	}
-	names := stringsFlag{}
 	fs := flag.NewFlagSet("", flag.ExitOnError)
+	var (
+		names = stringsFlag{}
+		jsons = stringsFlag{}
+	)
 	fs.Var(&names, "t", "table file")
+	fs.Var(&jsons, "j", "inline json")
+
 	op = args[0]
+
 	fs.Parse(args[1:])
 	if len(names) == 0 {
 		usage(errors.New("missing table files: -t filename"))
 	}
+
 	attributes = fs.Args()
+
 	tables = func() []*table.Table {
 		tables, err := load.TableFiles(names...)
 		if err != nil {
@@ -75,6 +84,14 @@ func parse(args []string) (op string, tables []*table.Table, attributes []string
 		}
 		return tables
 	}()
+
+	for _, j := range jsons {
+		t, err := load.Decode(strings.NewReader(j))
+		if err != nil {
+			usage(fmt.Errorf("loading json: %w", err))
+		}
+		tables = append(tables, t)
+	}
 	return
 }
 
@@ -96,6 +113,7 @@ func usage(err error) {
 	}
 	fmt.Println("Usage:")
 	fmt.Println("	rex <command> -t filename [-t filename ...] [attribute ...]")
+	fmt.Println("	rex <command> -j inlinejson [-j inlinejson ...] [attribute ...]")
 	fmt.Println("Commands:")
 	names := maps.Keys(ops)
 	slices.Sort(names)
