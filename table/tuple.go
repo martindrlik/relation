@@ -10,12 +10,14 @@ func (t T) Equals(u T) bool {
 	return len(t) == len(u) && t.equals(u)
 }
 
-func (t T) EqualsOnCommon(u T) bool {
-	for k, v := range t {
-		w, ok := u[k]
-		if ok && !reflect.DeepEqual(v, w) {
+func (t T) equalsOn(u T, attributes ...string) bool {
+	for _, attribute := range attributes {
+		tv, tok := t[attribute]
+		uv, uok := u[attribute]
+		if !tok || !uok {
 			return false
 		}
+		return reflect.DeepEqual(tv, uv)
 	}
 	return true
 }
