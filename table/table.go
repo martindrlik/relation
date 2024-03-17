@@ -31,7 +31,7 @@ func (t *Table) Tuples() Tuples {
 	return t.tuples
 }
 
-func (t *Table) CompleteTuples() []map[string]any {
+func (t *Table) CompleteTuples() Tuples {
 	x := []map[string]any{}
 	isComplete := t.isCompleteTuple()
 	for _, tuple := range t.tuples {

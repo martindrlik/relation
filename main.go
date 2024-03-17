@@ -9,13 +9,14 @@ import (
 	"strings"
 
 	"github.com/martindrlik/rex/box"
-	"github.com/martindrlik/rex/load"
+	"github.com/martindrlik/rex/persist"
 	"github.com/martindrlik/rex/table"
 	"golang.org/x/exp/maps"
 )
 
 func main() {
 	bind("union", "", func(a, b *table.Table) *table.Table { return a.Union(b) })
+	bind("difference", "", func(a, b *table.Table) *table.Table { return a.SetDifference(b) })
 	bind("natural-join", "", func(a, b *table.Table) *table.Table { return a.NaturalJoin(b) })
 	exec(parse(os.Args[1:]))
 }
@@ -78,16 +79,28 @@ func parse(args []string) (string, []*table.Table, []string) {
 		usage(errors.New("missing table files: -t filename"))
 	}
 
-	tables := func() []*table.Table {
-		tables, err := load.TableFiles(names...)
+	tables := []*table.Table{}
+	load := func(name string) error {
+		f, err := os.Open(name)
 		if err != nil {
+			return err
+		}
+		defer f.Close()
+		t, err := persist.Load(f)
+		if err != nil {
+			return err
+		}
+		tables = append(tables, t)
+		return nil
+	}
+	for _, name := range names {
+		if err := load(name); err != nil {
 			usage(fmt.Errorf("loading table: %w", err))
 		}
-		return tables
-	}()
+	}
 
 	for _, j := range jsons {
-		t, err := load.Decode(strings.NewReader(j))
+		t, err := persist.Load(strings.NewReader(j))
 		if err != nil {
 			usage(fmt.Errorf("loading json: %w", err))
 		}
