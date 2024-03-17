@@ -17,7 +17,9 @@ func Load(r io.Reader) (*table.Table, error) {
 	return table.New().Add(tuples...), nil
 }
 
-func LoadStrict(r io.Reader) (*table.Table, error) {
+// LoadSchemaMode loads table with schema and tuples.
+// {"schema": [...], "tuples": [{...}, ...]}
+func LoadSchemaMode(r io.Reader) (*table.Table, error) {
 	dec := json.NewDecoder(r)
 	raw := struct {
 		Schema []string

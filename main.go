@@ -63,16 +63,16 @@ func parse(args []string) (string, []*table.Table, []string) {
 	}
 	fs := flag.NewFlagSet("", flag.ExitOnError)
 	var (
-		names = stringsFlag{}
-		jsons = stringsFlag{}
+		schemalessFilenames = stringsFlag{}
+		schemalessInlines   = stringsFlag{}
 
-		namesStrict = stringsFlag{}
-		jsonsStrict = stringsFlag{}
+		schemaFilenames = stringsFlag{}
+		schemaInlines   = stringsFlag{}
 	)
-	fs.Var(&names, "t", "table file")
-	fs.Var(&jsons, "j", "inline json")
-	fs.Var(&namesStrict, "ts", "table file")
-	fs.Var(&jsonsStrict, "js", "inline json")
+	fs.Var(&schemalessFilenames, "ta", "name of file that contains array of tuples")
+	fs.Var(&schemalessInlines, "ia", "inline array of tuples")
+	fs.Var(&schemaFilenames, "ts", "name of file that contains table object: schema and tuples")
+	fs.Var(&schemaInlines, "is", "inline table object: schema and tuples")
 
 	op := args[0]
 	_, ok := ops[op]
@@ -81,7 +81,7 @@ func parse(args []string) (string, []*table.Table, []string) {
 	}
 
 	fs.Parse(args[1:])
-	if len(names) == 0 && len(namesStrict) == 0 && len(jsons) == 0 && len(jsonsStrict) == 0 {
+	if len(schemalessFilenames) == 0 && len(schemaFilenames) == 0 && len(schemalessInlines) == 0 && len(schemaInlines) == 0 {
 		usage(errors.New("missing table"))
 	}
 
@@ -102,28 +102,28 @@ func parse(args []string) (string, []*table.Table, []string) {
 		defer f.Close()
 		return load(f, fn)
 	}
-	loadFiles := func(names []string, fn func(io.Reader) (*table.Table, error)) {
-		for _, name := range names {
+	loadFiles := func(filenames []string, fn func(io.Reader) (*table.Table, error)) {
+		for _, name := range filenames {
 			if err := loadFile(name, fn); err != nil {
-				usage(fmt.Errorf("loading table: %w", err))
+				usage(fmt.Errorf("loading file: %w", err))
 			}
 		}
 	}
-	loadJsons := func(jsons []string, fn func(io.Reader) (*table.Table, error)) {
-		for _, j := range jsons {
-			t, err := fn(strings.NewReader(j))
+	loadInline := func(inlines []string, fn func(io.Reader) (*table.Table, error)) {
+		for _, inline := range inlines {
+			t, err := fn(strings.NewReader(inline))
 			if err != nil {
-				usage(fmt.Errorf("loading json: %w", err))
+				usage(fmt.Errorf("loading inline %v: %w", inline, err))
 			}
 			tables = append(tables, t)
 		}
 	}
 
-	loadFiles(names, persist.Load)
-	loadFiles(namesStrict, persist.LoadStrict)
+	loadFiles(schemalessFilenames, persist.Load)
+	loadFiles(schemaFilenames, persist.LoadSchemaMode)
 
-	loadJsons(jsons, persist.Load)
-	loadJsons(jsonsStrict, persist.LoadStrict)
+	loadInline(schemalessInlines, persist.Load)
+	loadInline(schemaInlines, persist.LoadSchemaMode)
 
 	return op, tables, fs.Args()
 }
@@ -145,14 +145,21 @@ func usage(err error) {
 		fmt.Printf("	%v\n", err)
 	}
 	fmt.Println("Usage:")
-	fmt.Println("	rex <command> -t filename [-t filename ...] [attribute ...]")
-	fmt.Println("	rex <command> -j inlinejson [-j inlinejson ...] [attribute ...]")
+	fmt.Println("	rex <command> <input> [attribute ...]")
 	fmt.Println("Commands:")
 	names := maps.Keys(ops)
 	slices.Sort(names)
 	for _, name := range names {
 		fmt.Printf("	%s: %s\n", name, ops[name].desc)
 	}
+	fmt.Println("Input:")
+	fmt.Println("	-ta <file>   [-ta <file>   ...]: name of file that contains array of tuples")
+	fmt.Println("	-ia <inline> [-ia <inline> ...]: inline array of tuples")
+	fmt.Println("	-ts <file>   [-ts <file>   ...]: name of file that contains table object: schema and tuples")
+	fmt.Println("	-is <inline> [-is <file>   ...]: inline table object: schema and tuples")
+
+	fmt.Println("Note:")
+	fmt.Println("	JSON is used as an input format")
 	os.Exit(1)
 }
 
