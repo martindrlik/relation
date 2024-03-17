@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"slices"
 	"strings"
@@ -64,9 +65,14 @@ func parse(args []string) (string, []*table.Table, []string) {
 	var (
 		names = stringsFlag{}
 		jsons = stringsFlag{}
+
+		namesStrict = stringsFlag{}
+		jsonsStrict = stringsFlag{}
 	)
 	fs.Var(&names, "t", "table file")
 	fs.Var(&jsons, "j", "inline json")
+	fs.Var(&namesStrict, "ts", "table file")
+	fs.Var(&jsonsStrict, "js", "inline json")
 
 	op := args[0]
 	_, ok := ops[op]
@@ -75,37 +81,49 @@ func parse(args []string) (string, []*table.Table, []string) {
 	}
 
 	fs.Parse(args[1:])
-	if len(names) == 0 {
-		usage(errors.New("missing table files: -t filename"))
+	if len(names) == 0 && len(namesStrict) == 0 && len(jsons) == 0 && len(jsonsStrict) == 0 {
+		usage(errors.New("missing table"))
 	}
 
 	tables := []*table.Table{}
-	load := func(name string) error {
-		f, err := os.Open(name)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		t, err := persist.Load(f)
+	load := func(r io.Reader, fn func(io.Reader) (*table.Table, error)) error {
+		t, err := fn(r)
 		if err != nil {
 			return err
 		}
 		tables = append(tables, t)
 		return nil
 	}
-	for _, name := range names {
-		if err := load(name); err != nil {
-			usage(fmt.Errorf("loading table: %w", err))
+	loadFile := func(name string, fn func(io.Reader) (*table.Table, error)) error {
+		f, err := os.Open(name)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		return load(f, fn)
+	}
+	loadFiles := func(names []string, fn func(io.Reader) (*table.Table, error)) {
+		for _, name := range names {
+			if err := loadFile(name, fn); err != nil {
+				usage(fmt.Errorf("loading table: %w", err))
+			}
+		}
+	}
+	loadJsons := func(jsons []string, fn func(io.Reader) (*table.Table, error)) {
+		for _, j := range jsons {
+			t, err := fn(strings.NewReader(j))
+			if err != nil {
+				usage(fmt.Errorf("loading json: %w", err))
+			}
+			tables = append(tables, t)
 		}
 	}
 
-	for _, j := range jsons {
-		t, err := persist.Load(strings.NewReader(j))
-		if err != nil {
-			usage(fmt.Errorf("loading json: %w", err))
-		}
-		tables = append(tables, t)
-	}
+	loadFiles(names, persist.Load)
+	loadFiles(namesStrict, persist.LoadStrict)
+
+	loadJsons(jsons, persist.Load)
+	loadJsons(jsonsStrict, persist.LoadStrict)
 
 	return op, tables, fs.Args()
 }

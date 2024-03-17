@@ -1,11 +1,12 @@
 package table
 
 type Table struct {
+	schema []string
 	tuples []map[string]any
 }
 
-func New() *Table {
-	return &Table{}
+func New(schema ...string) *Table {
+	return &Table{schema: schema}
 }
 
 func (t *Table) Add(tuples ...map[string]any) *Table {
@@ -18,11 +19,24 @@ func (t *Table) Add(tuples ...map[string]any) *Table {
 }
 
 func (t *Table) Schema() map[string]struct{} {
-	x := map[string]struct{}{}
-	for _, tuple := range t.tuples {
-		for k := range tuple {
-			x[k] = struct{}{}
+	ch := make(chan string)
+	go func() {
+		defer close(ch)
+		for _, k := range t.schema {
+			ch <- k
 		}
+		if len(t.schema) != 0 {
+			return
+		}
+		for _, tuple := range t.tuples {
+			for k := range tuple {
+				ch <- k
+			}
+		}
+	}()
+	x := map[string]struct{}{}
+	for attribute := range ch {
+		x[attribute] = struct{}{}
 	}
 	return x
 }
