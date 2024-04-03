@@ -11,15 +11,15 @@ func ExampleTable_NaturalJoin() {
 	movies := table.New().Add(
 		T{"title": "The Matrix", "year": 1999},
 		T{"title": "Dune", "year": 2021})
-	actors := table.New().Add(
-		T{"actor": "Keanu Reeves", "title": "The Matrix"},
-		T{"actor": "Carrie-Anne Moss", "title": "The Matrix"},
-		T{"actor": "Laurence Fishburne", "title": "The Matrix"},
-		T{"actor": "Timothée Chalamet", "title": "Dune"},
-		T{"actor": "Rebecca Ferguson", "title": "Dune"},
-		T{"actor": "Zendaya", "title": "Dune"})
+	casts := table.New().Add(
+		T{"cast": "Keanu Reeves", "title": "The Matrix"},
+		T{"cast": "Carrie-Anne Moss", "title": "The Matrix"},
+		T{"cast": "Laurence Fishburne", "title": "The Matrix"},
+		T{"cast": "Timothée Chalamet", "title": "Dune"},
+		T{"cast": "Rebecca Ferguson", "title": "Dune"},
+		T{"cast": "Zendaya", "title": "Dune"})
 
-	fmt.Println(box.Table([]string{"title", "year", "actor"}, movies.NaturalJoin(actors).Tuples()...))
+	fmt.Println(box.Table([]string{"title", "year", "cast"}, movies.NaturalJoin(casts).Tuples()...))
 
 	numbers := table.New().Add(
 		T{"number": 1},
@@ -35,7 +35,7 @@ func ExampleTable_NaturalJoin() {
 
 	// Output:
 	// ┏━━━━━━━━━━━━┯━━━━━━┯━━━━━━━━━━━━━━━━━━━━┓
-	// ┃ title      │ year │ actor              ┃
+	// ┃ title      │ year │ cast               ┃
 	// ┠────────────┼──────┼────────────────────┨
 	// ┃ The Matrix │ 1999 │ Keanu Reeves       ┃
 	// ┃ The Matrix │ 1999 │ Carrie-Anne Moss   ┃
