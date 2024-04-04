@@ -21,8 +21,8 @@ func (t *Table) NaturalJoin(u *Table) *Table {
 		}
 	}()
 	x := New()
-	for _, tuple := range t.CompleteTuples() {
-		for _, other := range u.CompleteTuples() {
+	for _, tuple := range t.Tuples() {
+		for _, other := range u.Tuples() {
 			if equal(tuple, other) {
 				merged := T(tuple).Merge(other)
 				x.Add(merged)

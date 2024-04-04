@@ -1,5 +1,7 @@
 package table
 
+import "slices"
+
 type Table struct {
 	schema []string
 	tuples []map[string]any
@@ -16,6 +18,18 @@ func (t *Table) Add(tuples ...map[string]any) *Table {
 		}
 	}
 	return t
+}
+
+func (t *Table) SchemaOrder() []string {
+	if len(t.schema) != 0 {
+		return t.schema
+	}
+	x := []string{}
+	for attribute := range t.Schema() {
+		x = append(x, attribute)
+	}
+	slices.Sort(x)
+	return x
 }
 
 func (t *Table) Schema() map[string]struct{} {

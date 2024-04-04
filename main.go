@@ -22,10 +22,10 @@ func main() {
 	exec(parse(os.Args[1:]))
 }
 
-func exec(op string, tables []*table.Table, attributes []string) {
+func exec(op string, tables []*table.Table, attributes []string, outputFormat string) {
 	func(fn func([]*table.Table) []*table.Table) {
 		for _, t := range fn(tables) {
-			project(t, attributes)
+			project(t, attributes, outputFormat)
 		}
 	}(binaryOp(op))
 }
@@ -49,15 +49,20 @@ func aggr(fn func(a, b *table.Table) *table.Table) func([]*table.Table) []*table
 	}
 }
 
-func project(table *table.Table, attributes []string) {
+func project(table *table.Table, attributes []string, outputFormat string) {
 	if len(attributes) == 0 {
 		attributes = maps.Keys(table.Schema())
 		slices.Sort(attributes)
 	}
-	fmt.Println(box.Table(attributes, table.Project(attributes...).Tuples()...))
+	switch outputFormat {
+	case "json":
+		persist.StoreSchemaMode(os.Stdout, table.Project(attributes...))
+	case "table":
+		fmt.Println(box.Table(attributes, table.Project(attributes...).Tuples()...))
+	}
 }
 
-func parse(args []string) (string, []*table.Table, []string) {
+func parse(args []string) (string, []*table.Table, []string, string) {
 	if len(args) < 2 {
 		usage(errors.New("missing arguments"))
 	}
@@ -68,6 +73,8 @@ func parse(args []string) (string, []*table.Table, []string) {
 
 		schemaFilenames = stringsFlag{}
 		schemaInlines   = stringsFlag{}
+
+		outputFormat = fs.String("of", "table", "table or json")
 	)
 	fs.Var(&schemalessFilenames, "ta", "name of file that contains array of tuples")
 	fs.Var(&schemalessInlines, "ia", "inline array of tuples")
@@ -125,7 +132,7 @@ func parse(args []string) (string, []*table.Table, []string) {
 	loadInline(schemalessInlines, persist.Load)
 	loadInline(schemaInlines, persist.LoadSchemaMode)
 
-	return op, tables, fs.Args()
+	return op, tables, fs.Args(), *outputFormat
 }
 
 type stringsFlag []string
