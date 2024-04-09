@@ -17,7 +17,7 @@ import (
 
 func main() {
 	bind("union", "", func(a, b *table.Table) *table.Table { return a.Union(b) })
-	bind("difference", "", func(a, b *table.Table) *table.Table { return a.SetDifference(b) })
+	bind("difference", "", func(a, b *table.Table) *table.Table { return a.Difference(b) })
 	bind("natural-join", "", func(a, b *table.Table) *table.Table { return a.NaturalJoin(b) })
 	exec(parse(os.Args[1:]))
 }
@@ -76,9 +76,9 @@ func parse(args []string) (string, []*table.Table, []string, string) {
 
 		outputFormat = fs.String("of", "table", "table or json")
 	)
-	fs.Var(&schemalessFilenames, "ta", "name of file that contains array of tuples")
+	fs.Var(&schemalessFilenames, "fa", "name of file that contains array of tuples")
 	fs.Var(&schemalessInlines, "ia", "inline array of tuples")
-	fs.Var(&schemaFilenames, "ts", "name of file that contains table object: schema and tuples")
+	fs.Var(&schemaFilenames, "fs", "name of file that contains table object: schema and tuples")
 	fs.Var(&schemaInlines, "is", "inline table object: schema and tuples")
 
 	op := args[0]
@@ -160,9 +160,9 @@ func usage(err error) {
 		fmt.Printf("	%s: %s\n", name, ops[name].desc)
 	}
 	fmt.Println("Input:")
-	fmt.Println("	-ta <file>   [-ta <file>   ...]: name of file that contains array of tuples")
+	fmt.Println("	-fa <file>   [-ta <file>   ...]: name of file that contains array of tuples")
 	fmt.Println("	-ia <inline> [-ia <inline> ...]: inline array of tuples")
-	fmt.Println("	-ts <file>   [-ts <file>   ...]: name of file that contains table object: schema and tuples")
+	fmt.Println("	-fs <file>   [-ts <file>   ...]: name of file that contains table object: schema and tuples")
 	fmt.Println("	-is <inline> [-is <file>   ...]: inline table object: schema and tuples")
 
 	fmt.Println("Note:")

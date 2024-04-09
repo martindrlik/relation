@@ -1,6 +1,6 @@
 package table
 
-func (t *Table) SetDifference(u *Table) *Table {
+func (t *Table) Difference(u *Table) *Table {
 	x := New()
 	isComplete := t.isCompleteTuple()
 	for _, tuple := range t.tuples {
