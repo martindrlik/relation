@@ -9,18 +9,18 @@ import (
 
 func ExampleTable_Project() {
 	movies := table.New().Add(
-		map[string]any{"title": "The Matrix", "year": 1999},
-		map[string]any{"title": "Dune", "year": 2021, "length": 155},
-		map[string]any{"title": "Blade Runner: 2049", "year": 2017, "length": 164})
-
-	fmt.Println(box.Table([]string{"title"}, movies.Project("title").Tuples()...))
+		movie("The Matrix", 1999),
+		movie("Dune: Part One", 2021),
+		tuple(title("Blade Runner: 2049"), year(2017), length(164)))
+	titles := movies.Project("title")
+	fmt.Println(box.Table(titles.SchemaOrder(), titles.Tuples()...))
 
 	// Output:
 	// ┏━━━━━━━━━━━━━━━━━━━━┓
 	// ┃ title              ┃
 	// ┠────────────────────┨
 	// ┃ The Matrix         ┃
-	// ┃ Dune               ┃
+	// ┃ Dune: Part One     ┃
 	// ┃ Blade Runner: 2049 ┃
 	// ┗━━━━━━━━━━━━━━━━━━━━┛
 }

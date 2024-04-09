@@ -67,15 +67,6 @@ func movie(t string, y int) map[string]any {
 	return tuple(title(t), year(y))
 }
 
-func withLength(tuple map[string]any, length int) map[string]any {
-	x := map[string]any{}
-	for k, v := range tuple {
-		x[k] = v
-	}
-	x["length"] = length
-	return x
-}
-
 func title(title string) func(map[string]any) {
 	return func(tuple map[string]any) {
 		tuple["title"] = title

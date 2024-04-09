@@ -8,8 +8,8 @@ import (
 )
 
 func ExampleTable_Union() {
-	movies2021 := table.New().Add(map[string]any{"title": "Dune", "year": 2021, "length": 155})
-	movies2024 := table.New().Add(map[string]any{"title": "Dune: Part Two", "year": 2024, "length": 166})
+	movies2021 := table.New().Add(tuple(title("Dune: Part One"), year(2021), length(155)))
+	movies2024 := table.New().Add(tuple(title("Dune: Part Two"), year(2024), length(166)))
 
 	movies := movies2021.Union(movies2024)
 
@@ -19,7 +19,7 @@ func ExampleTable_Union() {
 	// ┏━━━━━━━━━━━━━━━━┯━━━━━━┓
 	// ┃ title          │ year ┃
 	// ┠────────────────┼──────┨
-	// ┃ Dune           │ 2021 ┃
+	// ┃ Dune: Part One │ 2021 ┃
 	// ┃ Dune: Part Two │ 2024 ┃
 	// ┗━━━━━━━━━━━━━━━━┷━━━━━━┛
 }

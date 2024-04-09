@@ -8,24 +8,19 @@ import (
 )
 
 func ExampleTable_Rename() {
-	movie := func(title string, year int) map[string]any {
-		return map[string]any{"title": title, "year": year}
-	}
-	movies := table.New("title", "year").Add(
+	movies := table.New().Add(
 		movie("The Matrix", 1999),
-		movie("Dune", 2021))
-	movies = movies.Rename(map[string]string{
-		"title": "movie_title",
-		"year":  "release_year"})
+		movie("Dune: Part One", 2021))
+	movies = movies.Rename(map[string]string{"title": "movie_title", "year": "released"})
 	fmt.Println(box.Table(
-		[]string{"movie_title", "release_year"},
+		[]string{"movie_title", "released"},
 		movies.Tuples()...))
 
 	// Output:
-	// ┏━━━━━━━━━━━━━┯━━━━━━━━━━━━━━┓
-	// ┃ movie_title │ release_year ┃
-	// ┠─────────────┼──────────────┨
-	// ┃ The Matrix  │ 1999         ┃
-	// ┃ Dune        │ 2021         ┃
-	// ┗━━━━━━━━━━━━━┷━━━━━━━━━━━━━━┛
+	// ┏━━━━━━━━━━━━━━━━┯━━━━━━━━━━┓
+	// ┃ movie_title    │ released ┃
+	// ┠────────────────┼──────────┨
+	// ┃ The Matrix     │ 1999     ┃
+	// ┃ Dune: Part One │ 2021     ┃
+	// ┗━━━━━━━━━━━━━━━━┷━━━━━━━━━━┛
 }
