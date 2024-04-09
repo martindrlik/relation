@@ -31,12 +31,3 @@ func (t *Table) NaturalJoin(u *Table) *Table {
 	}
 	return x
 }
-
-func (t *Table) hasCommon(u *Table) bool {
-	for k := range t.Schema() {
-		if _, ok := u.Schema()[k]; ok {
-			return true
-		}
-	}
-	return false
-}

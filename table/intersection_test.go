@@ -9,17 +9,17 @@ import (
 
 func ExampleTable_Intersection() {
 	u := table.New().Add(
-		T{"title": "Dune"},
-		T{"title": "Dune: Part Two", "year": 2024})
+		T{"title": "Dune: Part One"},
+		movie("Dune: Part Two", 2024))
 	v := table.New().Add(
-		T{"title": "Dune"})
+		T{"title": "Dune: Part One"})
 
 	fmt.Println(box.Table([]string{"title"}, u.Intersection(v).Tuples()...))
 
 	// Output:
-	// ┏━━━━━━━┓
-	// ┃ title ┃
-	// ┠───────┨
-	// ┃ Dune  ┃
-	// ┗━━━━━━━┛
+	// ┏━━━━━━━━━━━━━━━━┓
+	// ┃ title          ┃
+	// ┠────────────────┨
+	// ┃ Dune: Part One ┃
+	// ┗━━━━━━━━━━━━━━━━┛
 }

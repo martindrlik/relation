@@ -11,12 +11,12 @@ import (
 type T = map[string]any
 
 func ExampleTable() {
-	movies := table.New().Add(
-		T{"title": "The Matrix", "year": 1999},
-		T{"title": "Blade Runner: 2049", "year": 2017, "length": 164},
-		T{"title": "Dune", "year": 2021, "length": 155})
+	movies := table.New("title", "year", "length").Add(
+		movie("The Matrix", 1999),
+		withLength(movie("Blade Runner: 2049", 2017), 164),
+		withLength(movie("Dune: Part One", 2021), 155))
 
-	fmt.Println(box.Table([]string{"title", "year", "length"}, movies.Tuples()...))
+	fmt.Println(box.Table(movies.SchemaOrder(), movies.Tuples()...))
 
 	// Output:
 	// ┏━━━━━━━━━━━━━━━━━━━━┯━━━━━━┯━━━━━━━━┓
@@ -24,14 +24,14 @@ func ExampleTable() {
 	// ┠────────────────────┼──────┼────────┨
 	// ┃ The Matrix         │ 1999 │ ?      ┃
 	// ┃ Blade Runner: 2049 │ 2017 │ 164    ┃
-	// ┃ Dune               │ 2021 │ 155    ┃
+	// ┃ Dune: Part One     │ 2021 │ 155    ┃
 	// ┗━━━━━━━━━━━━━━━━━━━━┷━━━━━━┷━━━━━━━━┛
 }
 
 func ExampleTable_Add() {
 	movies := table.New().Add(
-		T{"title": "The Matrix", "year": 1999},
-		T{"title": "The Matrix", "year": 1999}) // no duplicate
+		movie("The Matrix", 1999),
+		movie("The Matrix", 1999)) // duplicate
 
 	fmt.Println(box.Table([]string{"title", "year"}, movies.Tuples()...))
 
@@ -44,20 +44,34 @@ func ExampleTable_Add() {
 }
 
 func TestContains(t *testing.T) {
-	movies := table.New().Add(T{"title": "The Matrix", "year": 1999})
+	matrixMovie := movie("The Matrix", 1999)
+	movies := table.New().Add(matrixMovie)
 	moviesBox := box.Table([]string{"title", "year"}, movies.Tuples()...)
-	if !movies.Tuples().Contains(T{"title": "The Matrix", "year": 1999}) {
+	if !movies.Tuples().Contains(matrixMovie) {
 		t.Errorf(
 			"\nexpected\n%v\nto contain\n%v",
 			moviesBox,
-			T{"title": "The Matrix", "year": 1999})
+			matrixMovie)
 	}
 
-	matrixWithLength := T{"title": "The Matrix", "year": 1999, "length": 136}
+	matrixWithLength := withLength(matrixMovie, 136)
 	if movies.Tuples().Contains(matrixWithLength) {
 		t.Errorf(
 			"\nexpected\n%v\nnot to contain\n%v",
 			moviesBox,
 			matrixWithLength)
 	}
+}
+
+func movie(title string, year int) map[string]any {
+	return map[string]any{"title": title, "year": year}
+}
+
+func withLength(tuple map[string]any, length int) map[string]any {
+	x := map[string]any{}
+	for k, v := range tuple {
+		x[k] = v
+	}
+	x["length"] = length
+	return x
 }

@@ -9,11 +9,12 @@ import (
 
 func ExampleTable_Restrict() {
 	movies := table.New().Add(
-		map[string]any{"title": "Die Hard", "year": 1988},
-		map[string]any{"title": "The Matrix", "year": 1999},
-		map[string]any{"title": "Guardians of the Galaxy", "year": 2014},
-		map[string]any{"title": "Blade Runner: 2049", "year": 2017},
-		map[string]any{"title": "Dune", "year": 2021})
+		movie("Die Hard", 1988),
+		movie("The Matrix", 1999),
+		movie("Guardians of the Galaxy", 2014),
+		movie("Blade Runner: 2049", 2017),
+		movie("Dune: Part One", 2021))
+
 	year := func(f func(int) bool) func(tuple map[string]any) bool {
 		return func(tuple map[string]any) bool {
 			return f(tuple["year"].(int))
@@ -36,6 +37,6 @@ func ExampleTable_Restrict() {
 	// ┠─────────────────────────┼──────┨
 	// ┃ Guardians of the Galaxy │ 2014 ┃
 	// ┃ Blade Runner: 2049      │ 2017 ┃
-	// ┃ Dune                    │ 2021 ┃
+	// ┃ Dune: Part One          │ 2021 ┃
 	// ┗━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━━━━┛
 }
