@@ -13,8 +13,8 @@ type T = map[string]any
 func ExampleTable() {
 	movies := table.New("title", "year", "length").Add(
 		movie("The Matrix", 1999),
-		withLength(movie("Blade Runner: 2049", 2017), 164),
-		withLength(movie("Dune: Part One", 2021), 155))
+		tuple(title("Blade Runner: 2049"), year(2017), length(164)),
+		tuple(title("Dune: Part One"), year(2021), length(155)))
 
 	fmt.Println(box.Table(movies.SchemaOrder(), movies.Tuples()...))
 
@@ -54,7 +54,7 @@ func TestContains(t *testing.T) {
 			matrixMovie)
 	}
 
-	matrixWithLength := withLength(matrixMovie, 136)
+	matrixWithLength := tuple(title("The Matrix"), year(1999), length(136))
 	if movies.Tuples().Contains(matrixWithLength) {
 		t.Errorf(
 			"\nexpected\n%v\nnot to contain\n%v",
@@ -63,8 +63,8 @@ func TestContains(t *testing.T) {
 	}
 }
 
-func movie(title string, year int) map[string]any {
-	return map[string]any{"title": title, "year": year}
+func movie(t string, y int) map[string]any {
+	return tuple(title(t), year(y))
 }
 
 func withLength(tuple map[string]any, length int) map[string]any {
@@ -73,5 +73,31 @@ func withLength(tuple map[string]any, length int) map[string]any {
 		x[k] = v
 	}
 	x["length"] = length
+	return x
+}
+
+func title(title string) func(map[string]any) {
+	return func(tuple map[string]any) {
+		tuple["title"] = title
+	}
+}
+
+func year(year int) func(map[string]any) {
+	return func(tuple map[string]any) {
+		tuple["year"] = year
+	}
+}
+
+func length(length int) func(map[string]any) {
+	return func(tuple map[string]any) {
+		tuple["length"] = length
+	}
+}
+
+func tuple(set ...func(map[string]any)) map[string]any {
+	x := map[string]any{}
+	for _, f := range set {
+		f(x)
+	}
 	return x
 }

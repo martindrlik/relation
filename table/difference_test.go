@@ -9,18 +9,23 @@ import (
 
 func ExampleTable_Difference() {
 	available := table.New().Add(
-		T{"title": "Dune"},
-		T{"title": "Dune: Part Two", "year": 2024})
-	seen := table.New().Add(
-		T{"title": "Dune"})
+		tuple(title("Dune: Part One")),
+		tuple(title("Dune: Part Two"), year(2024)))
 
-	fmt.Println(box.Table([]string{"title"}, available.Difference(seen).Tuples()...))
+	fmt.Println(box.Table([]string{"title"}, available.Difference(table.New().Add(tuple(title("Dune: Part One")))).Tuples()...))
+	fmt.Println(box.Table([]string{"title"}, available.Difference(table.New().Add(tuple(title("Dune: Part Two"), year(2024)))).Tuples()...))
 
 	// Output:
 	// ┏━━━━━━━━━━━━━━━━┓
 	// ┃ title          ┃
 	// ┠────────────────┨
-	// ┃ Dune           ┃
+	// ┃ Dune: Part One ┃
 	// ┃ Dune: Part Two ┃
+	// ┗━━━━━━━━━━━━━━━━┛
+	//
+	// ┏━━━━━━━━━━━━━━━━┓
+	// ┃ title          ┃
+	// ┠────────────────┨
+	// ┃ Dune: Part One ┃
 	// ┗━━━━━━━━━━━━━━━━┛
 }

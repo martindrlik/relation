@@ -9,10 +9,9 @@ import (
 
 func ExampleTable_Intersection() {
 	u := table.New().Add(
-		T{"title": "Dune: Part One"},
+		tuple(title("Dune: Part One")),
 		movie("Dune: Part Two", 2024))
-	v := table.New().Add(
-		T{"title": "Dune: Part One"})
+	v := table.New().Add(tuple(title("Dune: Part One")))
 
 	fmt.Println(box.Table([]string{"title"}, u.Intersection(v).Tuples()...))
 
