@@ -153,7 +153,7 @@ func usage(err error) {
 		fmt.Printf("	%v\n", err)
 	}
 	fmt.Println("Usage:")
-	fmt.Println("	rex <command> <input> [attribute ...]")
+	fmt.Println("	rex <command> <input> <options> [attribute ...]")
 	fmt.Println("Commands:")
 	names := maps.Keys(ops)
 	slices.Sort(names)
@@ -171,6 +171,8 @@ func usage(err error) {
 	fmt.Println("	-ia <inline> [-ia <inline> ...]: inline array of tuples")
 	fmt.Println("	-fs <file>   [-ts <file>   ...]: name of file that contains table object: schema and tuples")
 	fmt.Println("	-is <inline> [-is <file>   ...]: inline table object: schema and tuples")
+	fmt.Println("Options:")
+	fmt.Println("	-of <format>: output format: table or json")
 
 	fmt.Println("Note:")
 	fmt.Println("	JSON is used as an input format")
