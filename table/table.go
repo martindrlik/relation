@@ -20,6 +20,17 @@ func (t *Table) Add(tuples ...map[string]any) *Table {
 	return t
 }
 
+// Remove returns new table without given tuple.
+func (t *Table) Remove(tuple map[string]any) *Table {
+	x := New()
+	for _, t := range t.tuples {
+		if !T(t).Equals(tuple) {
+			x.Add(t)
+		}
+	}
+	return x
+}
+
 func (t *Table) SchemaOrder() []string {
 	if len(t.schema) != 0 {
 		return t.schema

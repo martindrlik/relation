@@ -43,6 +43,20 @@ func ExampleTable_Add() {
 	// ┗━━━━━━━━━━━━┷━━━━━━┛
 }
 
+func ExampleTable_Remove() {
+	theMatrix := movie("The Matrix", 1999)
+	movies := table.New().Add(theMatrix, movie("Dune: Part Two", 2023))
+	movies = movies.Remove(theMatrix)
+	fmt.Println(box.Table([]string{"title", "year"}, movies.Tuples()...))
+
+	// Output:
+	// ┏━━━━━━━━━━━━━━━━┯━━━━━━┓
+	// ┃ title          │ year ┃
+	// ┠────────────────┼──────┨
+	// ┃ Dune: Part Two │ 2023 ┃
+	// ┗━━━━━━━━━━━━━━━━┷━━━━━━┛
+}
+
 func TestContains(t *testing.T) {
 	matrixMovie := movie("The Matrix", 1999)
 	movies := table.New().Add(matrixMovie)
